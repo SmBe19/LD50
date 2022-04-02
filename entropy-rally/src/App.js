@@ -1,18 +1,18 @@
-import { Client } from 'boardgame.io/react';
-import { TicTacToe } from './Game';
-import { TicTacToeBoard } from './Board'
-import { Local } from "boardgame.io/multiplayer";
+import {Client} from 'boardgame.io/react';
+import {Local} from "boardgame.io/multiplayer";
+import {EntropyRally} from "./Game";
+import {EntropyRallyBoard} from "./Board";
 
-const TicTacToeClient = Client({
-    game: TicTacToe,
-    board: TicTacToeBoard,
+const EntropyRallyClient = Client({
+    game: EntropyRally,
+    board: EntropyRallyBoard,
     multiplayer: Local(),
 })
 
 const App = () => (
     <div>
-        <TicTacToeClient playerID="0" />
-        <TicTacToeClient playerID="1" />
+        <EntropyRallyClient playerID="0"/>
+        <EntropyRallyClient playerID="1"/>
     </div>
 );
 

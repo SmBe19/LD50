@@ -1,60 +1,141 @@
-import {INVALID_MOVE} from "boardgame.io/core";
+import {INVALID_MOVE, TurnOrder} from "boardgame.io/core";
+import {EntropyRallyAi} from "./Ai";
 
-// Return true if `cells` is in a winning configuration.
-function IsVictory(cells) {
-  const positions = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],
-    [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
-  ];
-
-  const isRowComplete = row => {
-    const symbols = row.map(i => cells[i]);
-    return symbols.every(i => i !== null && i === symbols[0]);
-  };
-
-  return positions.map(isRowComplete).some(i => i === true);
+function Setup(ctx) {
+    return {
+        entropy: -1000,
+        tilePile: [], // TODO all all tiles and shuffle
+        cardPile: [], // TODO add all cards and shuffle
+        players: Array(ctx.numPlayers).fill({
+            score: 0,
+            cards: [],
+            unspentEnergy: 0,
+            finishedPlanning: false,
+            ships: [],
+        }),
+        tiles: [],
+    };
 }
 
-// Return true if all `cells` are occupied.
-function IsDraw(cells) {
-  return cells.filter(c => c === null).length === 0;
+function AdjustEntropy(G, ctx, change) {
+    if (G.entropy === 0) {
+        return;
+    }
+    G.entropy = Math.min(0, G.entropy + change);
 }
 
-export const TicTacToe = {
-  setup: () => ({ cells: Array(9).fill(null) }),
+function PlaceTile(G, ctx) {
 
-  turn: {
-    minMoves: 1,
-    maxMoves: 1,
-  },
+}
 
-  moves: {
-    clickCell: (G, ctx, id) => {
-      if (G.cells[id] !== null) {
-        return INVALID_MOVE;
-      }
-      G.cells[id] = ctx.currentPlayer;
+function PlaceInitShip(G, ctx) {
+
+}
+
+function PerformProduction(G, ctx) {
+    // TODO draw cards
+    // TODO handle energy portals
+    for (let i = 0; i < ctx.numPlayers; i++) {
+        G.players[i].unspentEnergy += 10;
     }
-  },
+}
 
-  endIf: (G, ctx) => {
-    if (IsVictory(G.cells)) {
-      return {winner: ctx.currentPlayer};
-    }
-    if (IsDraw(G.cells)) {
-      return {draw: true};
-    }
-  },
+function DistributeEnergy(G, ctx) {
+}
 
-  ai: {
-    enumerate: (G, ctx) => {
-      let moves = [];
-      for (let i = 0; i < 9; i++) {
-        if (G.cells[i] === null) {
-          moves.push({move: 'clickCell', args: [i]});
+function PlanCard(G, ctx) {
+
+}
+
+function FinishPlanning(G, ctx) {
+
+}
+
+function MoveLasers(G, ctx) {
+
+}
+
+function PlayCard(G, ctx) {
+
+}
+
+function AllShipsFinished(G, ctx) {
+
+}
+
+function CheckEndgame(G, ctx) {
+    if (!AllShipsFinished(G, ctx)) {
+        return;
+    }
+    if (G.entropy === 0) {
+        let winner = 0;
+        for (let i = 0; i < ctx.numPlayers; i++) {
+            if (G.players[i].score > G.players[winner].score) {
+                winner = i;
+            }
         }
-      }
-      return moves;
+        ctx.events.endGame({winner});
     }
-  }
+}
+
+// TODO correctly set starting player
+
+export const EntropyRally = {
+    setup: Setup,
+    moves: {},
+    phases: {
+        initTiles: {
+            moves: {PlaceTile},
+            turn: {
+                minMoves: 5,
+                maxMoves: 5,
+            },
+            next: 'initShips',
+            start: true,
+        },
+        initShips: {
+            moves: {PlaceShipInit: PlaceInitShip},
+            turn: {
+                order: TurnOrder.ONCE,
+            },
+            next: 'production',
+        },
+        production: {
+            onBegin: PerformProduction,
+            moves: {DistributeEnergy},
+            turn: {
+                order: TurnOrder.ONCE,
+                endIf: (G, ctx) => (G.players[ctx.currentPlayer].unspentEnergy === 0),
+            },
+            next: 'planning',
+        },
+        planning: {
+            // TODO set all players active at the same time
+            moves: {PlanCard, FinishPlanning},
+            turn: {
+                order: TurnOrder.ONCE,
+                endIf: (G, ctx) => (G.players[ctx.currentPlayer].finishedPlanning),
+            },
+            next: 'chaos',
+        },
+        chaos: {
+            // TODO end turn once a player can no longer play
+            onBegin: MoveLasers,
+            moves: {PlayCard},
+            next: (G, ctx) => {
+                return AllShipsFinished(G, ctx) ? 'expansion' : 'chaos';
+            },
+            onEnd: CheckEndgame,
+        },
+        expansion: {
+            moves: {PlaceTile},
+            turn: {
+                // TODO only let the starting player place
+                minMoves: 3,
+                maxMoves: 3,
+            },
+            next: 'production',
+        },
+    },
+    ai: EntropyRallyAi,
 }
