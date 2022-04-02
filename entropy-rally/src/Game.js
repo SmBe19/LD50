@@ -1,11 +1,15 @@
 import {INVALID_MOVE, TurnOrder} from "boardgame.io/core";
 import {EntropyRallyAi} from "./Ai";
+import {GetCardPile} from "./Cards";
+import {GetTilePile, START_TILE} from "./Tiles";
+import {getBorderTiles} from "./TileBoard";
 
 function Setup(ctx) {
     return {
         entropy: -1000,
-        tilePile: [], // TODO all all tiles and shuffle
-        cardPile: [], // TODO add all cards and shuffle
+        tilePile: ctx.random.Shuffle(GetTilePile()),
+        cardPile: ctx.random.Shuffle(GetCardPile()),
+        startingPlayer: 0,
         players: Array(ctx.numPlayers).fill({
             score: 0,
             cards: [],
@@ -13,23 +17,62 @@ function Setup(ctx) {
             finishedPlanning: false,
             ships: [],
         }),
-        tiles: [],
+        tiles: [TileAt(START_TILE, 0, 0)],
     };
 }
 
+function TileAt(tile, x, y) {
+    return {
+        tile,
+        x,
+        y,
+    }
+}
+
+function CreateShip(x, y) {
+    return {
+        x,
+        y,
+        energy: 0,
+        titanium: 0,
+        plannedCards: [],
+    }
+}
+
+const ONCE_SP = {
+    first: (G, ctx) => G.startingPlayer,
+    next: (G, ctx) => {
+        const nextPlayer = (ctx.playOrderPos + 1) % ctx.numPlayers;
+        if (nextPlayer !== G.startingPlayer) {
+            return nextPlayer;
+        }
+    }
+}
+
+const ONLY_SP = {
+    first: (G, ctx) => G.startingPlayer,
+    next: (G, ctx) => undefined,
+}
+
 function AdjustEntropy(G, ctx, change) {
-    if (G.entropy === 0) {
+    if (G.entropy === 0 || change === 0) {
         return;
     }
     G.entropy = Math.min(0, G.entropy + change);
 }
 
-function PlaceTile(G, ctx) {
-
+function PlaceTile(G, ctx, x, y) {
+    if (getBorderTiles(G).filter(tile => tile.x === x && tile.y === y).length === 0) {
+        return INVALID_MOVE;
+    }
+    const tile = G.tilePile.pop();
+    G.tiles.push(TileAt(tile, x, y));
+    AdjustEntropy(G, ctx, tile.entropyChange);
 }
 
-function PlaceInitShip(G, ctx) {
-
+function PlaceInitShip(G, ctx, x, y) {
+    // TODO check that it is not adjacent to other ship
+    G.players[ctx.playOrderPos].ships.push(CreateShip(x, y));
 }
 
 function PerformProduction(G, ctx) {
@@ -78,6 +121,10 @@ function CheckEndgame(G, ctx) {
     }
 }
 
+function NextStartingPlayer(G, ctx) {
+    G.startingPlayer = (G.startingPlayer + 1) % ctx.numPlayers;
+}
+
 // TODO correctly set starting player
 
 export const EntropyRally = {
@@ -87,16 +134,19 @@ export const EntropyRally = {
         initTiles: {
             moves: {PlaceTile},
             turn: {
-                minMoves: 5,
-                maxMoves: 5,
+                minMoves: 1,
+                maxMoves: 1,
             },
+            endIf: (G, ctx) => (G.tiles.length === 1 + 5 * ctx.numPlayers),
             next: 'initShips',
             start: true,
         },
         initShips: {
-            moves: {PlaceShipInit: PlaceInitShip},
+            moves: {PlaceInitShip},
             turn: {
                 order: TurnOrder.ONCE,
+                minMoves: 1,
+                maxMoves: 1,
             },
             next: 'production',
         },
@@ -104,8 +154,8 @@ export const EntropyRally = {
             onBegin: PerformProduction,
             moves: {DistributeEnergy},
             turn: {
-                order: TurnOrder.ONCE,
-                endIf: (G, ctx) => (G.players[ctx.currentPlayer].unspentEnergy === 0),
+                order: ONCE_SP,
+                endIf: (G, ctx) => (G.players[ctx.playOrderPos].unspentEnergy === 0),
             },
             next: 'planning',
         },
@@ -113,8 +163,8 @@ export const EntropyRally = {
             // TODO set all players active at the same time
             moves: {PlanCard, FinishPlanning},
             turn: {
-                order: TurnOrder.ONCE,
-                endIf: (G, ctx) => (G.players[ctx.currentPlayer].finishedPlanning),
+                order: ONCE_SP,
+                endIf: (G, ctx) => (G.players[ctx.playOrderPos].finishedPlanning),
             },
             next: 'chaos',
         },
@@ -130,11 +180,12 @@ export const EntropyRally = {
         expansion: {
             moves: {PlaceTile},
             turn: {
-                // TODO only let the starting player place
                 minMoves: 3,
                 maxMoves: 3,
+                order: ONLY_SP,
             },
             next: 'production',
+            onEnd: NextStartingPlayer,
         },
     },
     ai: EntropyRallyAi,

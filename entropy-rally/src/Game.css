@@ -1,0 +1,53 @@
+.tile-border {
+    background: #b1b1b1;
+    border-color: #b1b1b1;
+}
+.tile-Start {
+    background: #FF0000;
+    border-color: #FF0000;
+}
+.tile-Space {
+    background: #003170;
+    border-color: #003170;
+}
+.tile-Titanium {
+    background: #a64600;
+    border-color: #a64600;
+}
+.tile-Energy {
+    background: #dab300;
+    border-color: #dab300;
+}
+.tile-EnergyPortal {
+    background: #70004d;
+    border-color: #70004d;
+}
+.tile-NeatlyOrganizedSpace {
+    background: #147200;
+    border-color: #147200;
+}
+
+.tile-top {
+    width: 0;
+    border-bottom-width: 30px;
+    border-bottom-style: solid;
+    border-left: 52px solid transparent;
+    border-right: 52px solid transparent;
+    background: transparent;
+}
+.tile-bottom {
+    width: 0;
+    border-top-width: 30px;
+    border-top-style: solid;
+    border-left: 52px solid transparent;
+    border-right: 52px solid transparent;
+    background: transparent;
+}
+.tile-middle {
+    width: 104px;
+    height: 60px;
+    text-align: center;
+}
+.clickable {
+    cursor: pointer;
+}
