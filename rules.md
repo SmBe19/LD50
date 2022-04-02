@@ -30,9 +30,17 @@ In turn, each player distributes all their energy onto their ships.
 During the planning phase the moves for the chaos phase are chosen. For each ship a player lays down an arbitrary number of cards face down in the order they should be played. There is no lower or upper limit on the number of cards to be played.
 
 ### Chaos
-The chaos phase consists of multiple rounds. In each round, first all lasers are moved by one tile. Then, in turn, each player plays the first card for all its ships (if there is still a card left) and discards the amount of energy denoted on the card from the energy storage of this ship. If applicable, they adjust the global entropy level. They may choose the order in which they perform the action for their ships. If a ship does not have enough energy left for an action, this action is ignored. Afterwards, the cards are discarded and the next card in order becomes the "first" card. This is repeated until all cards were played.
+The chaos phase consists of multiple rounds.
 
-If a ship is hit by a laser, all its titanium and energy are discarded and the ship is removed from the game. If a player does not have any ships left, they can no longer play and their final score is the number of points they currently have.
+In each round, first all lasers and gravitational waves are moved by one tile.
+
+If a ship is hit by a laser, it loses 2 energy. The laser disappears. If the ship has now zero or less energy, all its titanium is discarded and the ship is removed from the game. If a player does not have any ships left, they can no longer play and their final score is the number of points they currently have.
+
+If a ship is hit by a gravitational wave, it is moved one tile into the direction of the wave. The wave disappears.
+
+Then, in turn, each player plays the first card for all its ships (if there is still a card left) and discards the amount of energy denoted on the card from the energy storage of this ship. If applicable, they adjust the global entropy level. They may choose the order in which they perform the action for their ships. If a ship does not have enough energy left for an action, this action is ignored. Afterwards, the cards are discarded and the next card in order becomes the "first" card. This is repeated until all cards were played.
+
+If a ship moves off the tiles, it is destroyed.
 
 If multiple ships of the same player land on the same tile, the player may exchange any number of titanium and energy between the ships.
 
@@ -79,6 +87,9 @@ Turn the direction of the ship by the specified amount.
 
 ### Shoot Laser
 Shoots a laser in the current direction. The laser token is placed one tile ahead of the ship's current tile. It will move one step each round.
+
+### Send Gravitational Wave
+Send out a gravitational wave in the current direction. The wave token is placed one tile ahead of the ship's current tile. It will move one step each round.
 
 ### Titanium Portal
 Open a portal into the new universe and transport any number of titanium currently on the ship. The required energy is independent of the amount of titanium transported. The transported titanium is removed from the ship and the player receives a point for each transported titanium.
