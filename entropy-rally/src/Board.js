@@ -98,6 +98,22 @@ function ExpansionBoard({ctx, G, moves, myTurn}) {
     )
 }
 
+function ScoreBoard({ctx, G}) {
+    let winner = '';
+    if (ctx.gameover) {
+        winner = <div id="winner">Winner: {ctx.gameover.winner}</div>;
+    }
+
+    const scoreBoard = G.players.map((player, idx) => <div key={idx} className={'player-' + idx}>Player {idx+1}{G.startingPlayer === idx && <span title="starting player"> ★</span>}: {player.score}</div>)
+
+    return (
+        <div>
+            {winner}
+            {scoreBoard}
+        </div>
+    )
+}
+
 function calculateHexagonParameters(side) {
     return (<div>
         <div>Rect: {Math.sqrt(3) * side}px/{side}px</div>
@@ -107,18 +123,14 @@ function calculateHexagonParameters(side) {
 
 export function EntropyRallyBoard({ctx, G, moves, playerID}) {
     let myTurn = ctx.currentPlayer === playerID;
-    let winner = '';
-    if (ctx.gameover) {
-        winner = <div id="winner">Winner: {ctx.gameover.winner}</div>;
-    }
     const playerIDInt = parseInt(playerID);
 
     return (
         <div>
             <div><h1>Entropy Rally</h1></div>
-            <div><h2 className={'player-' + playerIDInt}>Player {playerIDInt + 1}</h2></div>
-            {winner}
+            <div><h2 className={'player-' + playerIDInt}>Player {playerIDInt + 1}{G.startingPlayer === playerIDInt && <span title="starting player"> ★</span>}</h2></div>
             <div>Entropy: {G.entropy}</div>
+            <ScoreBoard ctx={ctx} G={G}/>
             {ctx.phase === 'initTiles' && <InitTilesBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn}/>}
             {ctx.phase === 'initShips' && <InitShipsBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn}/>}
             {ctx.phase === 'production' &&

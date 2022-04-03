@@ -1,8 +1,7 @@
-import {ActivePlayers, INVALID_MOVE, Stage, TurnOrder} from "boardgame.io/core";
+import {INVALID_MOVE, TurnOrder} from "boardgame.io/core";
 import {EntropyRallyAi} from "./Ai";
 import {GetCardPile} from "./Cards";
 import {GetTilePile, START_TILE} from "./Tiles";
-import {getBorderTiles} from "./TileBoard";
 
 function Setup(ctx) {
     return {
@@ -100,7 +99,7 @@ function AdjustEntropy(G, ctx, change) {
 }
 
 function PlaceTile(G, ctx, x, y) {
-    if (getBorderTiles(G).filter(tile => tile.x === x && tile.y === y).length === 0) {
+    if (GetBorderTiles(G).filter(tile => tile.x === x && tile.y === y).length === 0) {
         return INVALID_MOVE;
     }
     const tile = G.tilePile.pop();
@@ -109,7 +108,10 @@ function PlaceTile(G, ctx, x, y) {
 }
 
 function PlaceInitShip(G, ctx, x, y, rotation) {
-    // TODO check that it is not adjacent/equivalent to other ship
+    const blockedTiles = G.players.flatMap(player => player.ships).flatMap(ship => [ship, ...GetNeighbors(ship)]);
+    if (blockedTiles.filter(tile => tile.x === x && tile.y === y).length > 0) {
+        return INVALID_MOVE;
+    }
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
 }
 
@@ -135,6 +137,31 @@ function PerformProduction(G, ctx) {
 
 function GetShipByID(G, ctx, shipID) {
     return G.players[ctx.playOrderPos].ships.filter(ship => ship.id === shipID)[0];
+}
+
+export function GetNeighbors(tile) {
+    return [
+        {x: tile.x - 1, y: tile.y},
+        {x: tile.x + 1, y: tile.y},
+        {x: tile.x, y: tile.y + 1},
+        {x: tile.x + 1, y: tile.y + 1},
+        {x: tile.x - 1, y: tile.y - 1},
+        {x: tile.x, y: tile.y - 1},
+    ];
+}
+
+export function GetBorderTiles(G) {
+    const tileKey = (tile) => tile.x * 100000 + tile.y;
+    const existingTiles = new Set(G.tiles.map(tile => tileKey(tile)));
+    const borderTiles = G.tiles.flatMap(tile => GetNeighbors(tile));
+    const res = [];
+    for (const tile of borderTiles) {
+        if (!existingTiles.has(tileKey(tile))) {
+            res.push(tile);
+            existingTiles.add(tileKey(tile));
+        }
+    }
+    return res;
 }
 
 function DistributeEnergy(G, ctx, shipID, amount) {
@@ -194,7 +221,48 @@ function GetDeltaFromRotation(rotation) {
 }
 
 function ResolveMovementActions(G, ctx, x, y) {
-    // TODO implement battle, laser & out of board
+    const ships = G.players.flatMap(player => player.ships).filter(ship => ship.x === x && ship.y === y);
+    const lasers = G.lasers.filter(laser => laser.x === x && laser.y === y);
+    const tiles = G.tiles.filter(tile => tile.x === x && tile.y === y);
+    const locationsToUpdate = [];
+    for (const laser of lasers) {
+        if (laser.type === 1) {
+            for (const ship of ships) {
+                ship.energy -= 2;
+            }
+        } else if (laser.type === 1) {
+            for (const ship of ships) {
+                ship.x += laser.dx;
+                ship.y += laser.dy;
+                if (locationsToUpdate.filter(tile => tile.x === ship.x && tile.y === ship.y).length === 0) {
+                    locationsToUpdate.push({x: ship.x, y: ship.y});
+                }
+            }
+        }
+    }
+    // TODO implement resource transfer if multiple ships of same player are present
+    if (ships.length > 1) {
+        for (let i = 0; i < ctx.numPlayers; i++) {
+            const otherEnergy = ships.filter(ship => ship.player !== i).map(ship => ship.energy).reduce((a, b) => a + b, 0);
+            for (const ship of ships.filter(ship => ship.player === i)) {
+                ship.energy -= otherEnergy;
+            }
+        }
+    }
+    if (ships.length > 0 || tiles.length === 0) {
+        G.lasers = G.lasers.filter(laser => laser.x !== x || laser.y !== y);
+    }
+    if (tiles.length === 0) {
+        for(const player of G.players) {
+            player.ships = player.ships.filter(ship => ship.x !== x || ship.y !== y);
+        }
+    }
+    for(const player of G.players) {
+        player.ships = player.ships.filter(ship => ship.energy >= 0);
+    }
+    for (const location of locationsToUpdate) {
+        ResolveMovementActions(G, ctx, location.x, location.y);
+    }
 }
 
 function HandleCardAction(G, ctx, ship, card) {
@@ -244,8 +312,11 @@ function PlayCard(G, ctx, shipID) {
     ship.playedCards.push(card);
 }
 
-function PlaceShip(G, ctx, x, y, rotation) {
-    // TODO check that it is adjacent to creating ship
+function PlaceShip(G, ctx, shipID, x, y, rotation) {
+    const ship = GetShipByID(G, ctx, shipID);
+    if (!ship || GetNeighbors(ship).filter(tile => tile.x === x && tile.y === y).length === 0) {
+        return INVALID_MOVE;
+    }
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
 }
 

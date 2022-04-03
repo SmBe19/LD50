@@ -1,13 +1,15 @@
-import {getBorderTiles} from "./TileBoard";
+import {GetBorderTiles} from "./Game";
 
 export const EntropyRallyAi = {
     enumerate: (G, ctx) => {
-        if (ctx.phase === 'initTiles') {
-            return getBorderTiles(G).map(tile => ({
-                move: 'PlaceTile',
-                args: [tile.x, tile.y],
-            }));
+        switch(ctx.phase) {
+            case 'initTiles':
+                return GetBorderTiles(G).map(tile => ({
+                    move: 'PlaceTile',
+                    args: [tile.x, tile.y],
+                }));
+            default:
+                return [];
         }
-        return [];
     }
 }

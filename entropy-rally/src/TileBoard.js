@@ -1,4 +1,5 @@
 import React from "react";
+import {GetBorderTiles} from "./Game";
 
 function Tile({x, y, owner, tile, onClick}) {
     let cssClass = 'tile-' + (tile || {name: 'border'}).name
@@ -42,31 +43,6 @@ export function getHexagonCenterScreenCoords(x, y) {
     }
 }
 
-export function getNeighbors(tile) {
-    return [
-        {x: tile.x - 1, y: tile.y},
-        {x: tile.x + 1, y: tile.y},
-        {x: tile.x, y: tile.y + 1},
-        {x: tile.x + 1, y: tile.y + 1},
-        {x: tile.x - 1, y: tile.y - 1},
-        {x: tile.x, y: tile.y - 1},
-    ];
-}
-
-export function getBorderTiles(G) {
-    const tileKey = (tile) => tile.x * 100000 + tile.y;
-    const existingTiles = new Set(G.tiles.map(tile => tileKey(tile)));
-    const borderTiles = G.tiles.flatMap(tile => getNeighbors(tile));
-    const res = [];
-    for (const tile of borderTiles) {
-        if (!existingTiles.has(tileKey(tile))) {
-            res.push(tile);
-            existingTiles.add(tileKey(tile));
-        }
-    }
-    return res;
-}
-
 export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
 
     const borderTileKey = (tile) => 'b' + (tile.x * 100000 + tile.y);
@@ -77,7 +53,7 @@ export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
             <Tile key={tile.tile.id} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile}/>
     );
     if (clickableBorder === true) {
-        tiles.push(...getBorderTiles(G).map(tile =>
+        tiles.push(...GetBorderTiles(G).map(tile =>
             <Tile key={borderTileKey(tile)} x={tile.x} y={tile.y} onClick={onClick}/>));
     }
     let ships = G.players.flatMap(player => player.ships).map(ship =>
