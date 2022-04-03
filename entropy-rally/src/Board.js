@@ -105,36 +105,45 @@ function PlanningBoard({ctx, G, moves, myTurn, playerID}) {
     )
 }
 
-// TODO implement ship placement
 function ChaosBoard({ctx, G, moves, myTurn, playerID}) {
+    const [rotation, setRotation] = useState(0);
     const playCardAction = (shipID) => moves.PlayCard(shipID);
+    const placeShipAction = (x, y) => moves.PlaceShip(G.players[playerID].placingShipFrom, x, y, rotation);
 
+    const placingShip = G.players[playerID].placingShip;
     const myShipBoards = G.players[playerID].ships.map(ship =>
-        <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={myTurn && !ship.playedThisTurn} cardsVisible={true}
+        <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={myTurn && !ship.playedThisTurn && ship.plannedCards.length > 0 && !placingShip} cardsVisible={true}
                    playCardAction={playCardAction}/>);
     const otherShipBoards = G.players.filter((player, idx) => idx !== playerID).flatMap(player => player.ships).map(ship =>
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={false} cardsVisible={false}/>)
 
     return (
         <Fragment>
-            <TileBoard ctx={ctx} G={G}/>
+            <TileBoard ctx={ctx} G={G} clickableTiles={myTurn && placingShip} onClick={placeShipAction}/>
             <CardList ctx={ctx} G={G} cards={G.players[playerID].cards}/>
             <div className="board-ships">
                 {myShipBoards}
                 {otherShipBoards}
             </div>
+            {myTurn && placingShip && <ShipPreview ctx={ctx} G={G} rotation={rotation} setRotation={setRotation}/>}
         </Fragment>
     )
 }
 
 function ExpansionBoard({ctx, G, moves, myTurn}) {
     const onClick = (x, y) => moves.PlaceTile(x, y);
+    const nextTile = G.tilePile[G.tilePile.length - 1];
 
     return (
-        <div>
-            <div>Current Tile: {G.tilePile[G.tilePile.length - 1].name}</div>
+        <Fragment>
             <TileBoard ctx={ctx} G={G} clickableBorder={myTurn} onClick={onClick}/>
-        </div>
+            <div className="tile-preview">
+                <div className="tile-preview-title">Next Tile</div>
+                <div className="tile-board-inner">
+                    <Tile x={0} y={0} tile={nextTile}/>
+                </div>
+            </div>
+        </Fragment>
     )
 }
 
@@ -142,7 +151,7 @@ function ScoreBoard({ctx, G}) {
     const scoreBoard = G.players.map((player, idx) =>
         <tr key={idx} className={'player-' + idx}>
             <td className="board-scores-starting-player">{G.startingPlayer === idx &&
-                <span title="starting player">★</span>}</td>
+                <span title="starting player">♚</span>}</td>
             <td>Player {idx + 1}</td>
             {ctx.phase === 'production' && <td className="board-scores-energy">{player.unspentEnergy}↯</td>}
             <td className="board-scores-score">{player.score}★</td>
@@ -171,7 +180,11 @@ export function EntropyRallyBoard({ctx, G, moves, playerID}) {
     const playOrderPos = ctx.playOrder.indexOf(playerID);
     let winner = '';
     if (ctx.gameover) {
-        winner = (<div className="board-winner">Winner: Player {ctx.gameover.winner}</div>);
+        if (ctx.gameover.winners.length > 1) {
+            winner = (<div className="board-winner">Winners: {ctx.gameover.winners.map(winner => 'Player ' + winner).join(', ')}</div>);
+        } else {
+            winner = (<div className="board-winner">Winner: Player {ctx.gameover.winner}</div>);
+        }
     }
 
     return (

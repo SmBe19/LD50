@@ -10,11 +10,14 @@ function Setup(ctx) {
         cardPile: ctx.random.Shuffle(GetCardPile()),
         startingPlayer: 0,
         lastShipId: 0,
+        lastLaserId: 0,
         players: Array(ctx.numPlayers).fill({
             score: 0,
             cards: [],
             unspentEnergy: 0,
             finishedPlanning: false,
+            placingShip: false,
+            placingShipFrom: null,
             ships: [],
         }),
         tiles: [CreateTile(START_TILE, 0, 0)],
@@ -48,12 +51,15 @@ function CreateShip(G, player, x, y, rotation) {
     }
 }
 
-function CreateLaser(x, y, dx, dy, type) {
+function CreateLaser(G, x, y, dx, dy, rotation, type) {
+    G.lastLaserId++;
     return {
+        id: G.lastLaserId,
         x,
         y,
         dx,
         dy,
+        rotation,
         type,
     }
 }
@@ -73,7 +79,10 @@ const ONLY_SP = {
     next: (G, ctx) => undefined,
 }
 
-function SkipFinishedShipActionsPlayers(G, ctx, idx) {
+function SkipFinishedShipActionsPlayers(G, ctx, idx, isFirst) {
+    if (!isFirst && idx === G.startingPlayer) {
+        return;
+    }
     if (!AllShipsForPlayerFinished(G, ctx, idx)) {
         return idx;
     }
@@ -81,14 +90,17 @@ function SkipFinishedShipActionsPlayers(G, ctx, idx) {
     do {
         currIdx = (currIdx + 1) % ctx.numPlayers;
     } while (currIdx !== idx && AllShipsForPlayerFinished(G, ctx, currIdx))
-    if (currIdx !== idx) {
+    if (currIdx !== idx && currIdx !== G.startingPlayer) {
         return currIdx;
+    }
+    if (isFirst) {
+        return idx;
     }
 }
 
 const SHIP_ACTIONS_SP = {
-    first: (G, ctx) => SkipFinishedShipActionsPlayers(G, ctx, G.startingPlayer),
-    next: (G, ctx) => SkipFinishedShipActionsPlayers(G, ctx, (ctx.playOrderPos + 1) % ctx.numPlayers),
+    first: (G, ctx) => SkipFinishedShipActionsPlayers(G, ctx, G.startingPlayer, true),
+    next: (G, ctx) => SkipFinishedShipActionsPlayers(G, ctx, (ctx.playOrderPos + 1) % ctx.numPlayers, false),
 }
 
 function AdjustEntropy(G, ctx, change) {
@@ -102,9 +114,11 @@ function PlaceTile(G, ctx, x, y) {
     if (GetBorderTiles(G).filter(tile => tile.x === x && tile.y === y).length === 0) {
         return INVALID_MOVE;
     }
+    console.log('Place Tile');
     const tile = G.tilePile.pop();
     G.tiles.push(CreateTile(tile, x, y));
     AdjustEntropy(G, ctx, tile.entropyChange);
+    tile.entropyChange = 0;
 }
 
 function PlaceInitShip(G, ctx, x, y, rotation) {
@@ -112,7 +126,9 @@ function PlaceInitShip(G, ctx, x, y, rotation) {
     if (blockedTiles.filter(tile => tile.x === x && tile.y === y).length > 0) {
         return INVALID_MOVE;
     }
+    console.log('Place Init Ship');
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
+    ResolveMovementActions(G, ctx, x, y);
 }
 
 function PerformProduction(G, ctx) {
@@ -172,6 +188,7 @@ function DistributeEnergy(G, ctx, shipID, amount) {
     if (!ship) {
         return INVALID_MOVE;
     }
+    console.log('Distribute Energy');
     ship.energy += amount;
     G.players[ctx.playOrderPos].unspentEnergy -= amount;
 }
@@ -185,6 +202,7 @@ function PlanCard(G, ctx, shipID, cardID) {
     if (cardIdx < 0 || cardIdx >= G.players[ctx.playOrderPos].cards.length) {
         return INVALID_MOVE;
     }
+    console.log('Plan Card');
     ship.plannedCards.push(G.players[ctx.playOrderPos].cards[cardIdx]);
     G.players[ctx.playOrderPos].cards.splice(cardIdx, 1);
 }
@@ -194,9 +212,11 @@ function FinishPlanning(G, ctx) {
 }
 
 function MoveLasers(G, ctx) {
+    console.log('Move Lasers');
     for (const laser of G.lasers) {
         laser.x += laser.dx;
         laser.y += laser.dy;
+        console.log('Laser', laser.x, laser.y);
         ResolveMovementActions(G, ctx, laser.x, laser.y);
     }
 }
@@ -225,13 +245,16 @@ function ResolveMovementActions(G, ctx, x, y) {
     const lasers = G.lasers.filter(laser => laser.x === x && laser.y === y);
     const tiles = G.tiles.filter(tile => tile.x === x && tile.y === y);
     const locationsToUpdate = [];
+    console.log('Resolve actions for', x, y);
     for (const laser of lasers) {
         if (laser.type === 1) {
             for (const ship of ships) {
+                console.log('Laser hit ship', ship.id);
                 ship.energy -= 2;
             }
-        } else if (laser.type === 1) {
+        } else if (laser.type === 2) {
             for (const ship of ships) {
+                console.log('Wave hit ship', ship.id);
                 ship.x += laser.dx;
                 ship.y += laser.dy;
                 if (locationsToUpdate.filter(tile => tile.x === ship.x && tile.y === ship.y).length === 0) {
@@ -242,28 +265,48 @@ function ResolveMovementActions(G, ctx, x, y) {
     }
     // TODO implement resource transfer if multiple ships of same player are present
     if (ships.length > 1) {
+        const energyLoss = Array(ctx.numPlayers).fill(0);
         for (let i = 0; i < ctx.numPlayers; i++) {
-            const otherEnergy = ships.filter(ship => ship.player !== i).map(ship => ship.energy).reduce((a, b) => a + b, 0);
-            for (const ship of ships.filter(ship => ship.player === i)) {
-                ship.energy -= otherEnergy;
+            energyLoss[i] = ships.filter(ship => ship.player !== i).map(ship => ship.energy).reduce((a, b) => a + b, 0);
+        }
+        for (let i = 0; i < ctx.numPlayers; i++) {
+            const otherEnergy = energyLoss[i];
+            if (otherEnergy > 0) {
+                console.log('Ships of player', i, 'lose', otherEnergy, 'energy');
+                for (const ship of ships.filter(ship => ship.player === i)) {
+                    ship.energy -= otherEnergy;
+                }
             }
         }
     }
     if (ships.length > 0 || tiles.length === 0) {
+        console.log('Delete lasers')
         G.lasers = G.lasers.filter(laser => laser.x !== x || laser.y !== y);
     }
-    if (tiles.length === 0) {
-        for(const player of G.players) {
+    if (ships.length > 0 && tiles.length === 0) {
+        for (const player of G.players) {
             player.ships = player.ships.filter(ship => ship.x !== x || ship.y !== y);
+            console.log('Ships off the map');
         }
     }
-    for(const player of G.players) {
+    for (const player of G.players) {
         player.ships = player.ships.filter(ship => ship.energy >= 0);
     }
     const aliveShips = ships.filter(ship => ship.energy >= 0);
     if (tiles.length > 0 && aliveShips.length > 0) {
-        for(const tile of tiles.filter(tile => tile.tile.energyProduction > 0)) {
-            tile.owner = aliveShips[0].player;
+        for (const tileWrapper of tiles) {
+            const tile = tileWrapper.tile;
+            if (tile.titanium > 0) {
+                aliveShips[0].titanium += tile.titanium;
+                tile.titanium = 0;
+            }
+            if (tile.energy > 0) {
+                aliveShips[0].energy += tile.energy;
+                tile.energy = 0;
+            }
+            if (tile.energyProduction > 0) {
+                tileWrapper.owner = aliveShips[0].player;
+            }
         }
     }
     for (const location of locationsToUpdate) {
@@ -284,15 +327,17 @@ function HandleCardAction(G, ctx, ship, card) {
             break;
         case 'SHOOT':
             const shootDelta = GetDeltaFromRotation(ship.rotation);
-            G.lasers.push(CreateLaser(ship.x + shootDelta.dx, ship.y + shootDelta.dy, shootDelta.dx, shootDelta.dy, card.actionArg));
-            ResolveMovementActions(G, ship.x + shootDelta.dx, ship.y + shootDelta.dy);
+            const newLaser = CreateLaser(G, ship.x + shootDelta.dx, ship.y + shootDelta.dy, shootDelta.dx, shootDelta.dy, ship.rotation, card.actionArg);
+            G.lasers.push(newLaser);
+            ResolveMovementActions(G, ctx, newLaser.x, newLaser.y);
             break;
         case 'PORTAL':
             G.players[ctx.playOrderPos].score += ship.titanium;
             ship.titanium = 0;
             break;
         case 'SHIP':
-            ctx.setStage({stage: 'placeShip', minMoves: 1, maxMoves: 1})
+            G.players[ctx.playOrderPos].placingShip = true;
+            G.players[ctx.playOrderPos].placingShipFrom = ship.id;
             break;
         case 'TIDY':
             break;
@@ -302,10 +347,14 @@ function HandleCardAction(G, ctx, ship, card) {
 }
 
 function PlayCard(G, ctx, shipID) {
+    if (G.players[ctx.playOrderPos].placingShip) {
+        return INVALID_MOVE;
+    }
     const ship = GetShipByID(G, ctx, shipID);
     if (!ship || ship.playedThisTurn || ship.plannedCards.length === 0) {
         return INVALID_MOVE;
     }
+    console.log('Play Card');
     ship.playedThisTurn = true;
     const card = ship.plannedCards.shift();
     if (ship.energy < card.energy) {
@@ -319,22 +368,36 @@ function PlayCard(G, ctx, shipID) {
 }
 
 function PlaceShip(G, ctx, shipID, x, y, rotation) {
+    if (!G.players[ctx.playOrderPos].placingShip) {
+        return INVALID_MOVE;
+    }
     const ship = GetShipByID(G, ctx, shipID);
     if (!ship || GetNeighbors(ship).filter(tile => tile.x === x && tile.y === y).length === 0) {
         return INVALID_MOVE;
     }
+    if (G.players.flatMap(player => player.ships).filter(ship => ship.x === x && ship.y === y).length > 0) {
+        return INVALID_MOVE;
+    }
+    console.log('Place Ship');
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
+    G.players[ctx.playOrderPos].placingShip = false;
+    ResolveMovementActions(G, ctx, x, y);
 }
 
 function ResetPlayedThisTurn(G, ctx) {
-    for (const ship of G.players[ctx.playOrderPos].ships) {
+    console.log('Reset Played This Turn');
+    for (const ship of G.players.flatMap(player => player.ships)) {
         ship.playedThisTurn = false;
     }
 }
 
 function AllShipsForPlayerPlayed(G, ctx, idx) {
-    for (const ship of G.players[idx === undefined ? ctx.playOrderPos : idx].ships) {
-        if (!ship.playedThisTurn && ship.plannedCards.length >= 0) {
+    const player = G.players[idx === undefined ? ctx.playOrderPos : idx];
+    if (player.placingShip) {
+        return false;
+    }
+    for (const ship of player.ships) {
+        if (!ship.playedThisTurn && ship.plannedCards.length > 0) {
             return false;
         }
     }
@@ -363,14 +426,18 @@ function CheckEndgame(G, ctx) {
     if (!AllShipsFinished(G, ctx)) {
         return;
     }
-    if (G.entropy === 0) {
+    if (G.entropy === 0 || G.players.filter(player => player.ships.length > 0).length <= 1) {
         let winner = 0;
-        for (let i = 0; i < ctx.numPlayers; i++) {
+        let winners = [0];
+        for (let i = 1; i < ctx.numPlayers; i++) {
             if (G.players[i].score > G.players[winner].score) {
                 winner = i;
+                winners = [i];
+            } else if (G.players[i].score === G.players[winner].score) {
+                winners.push(i);
             }
         }
-        ctx.events.endGame({winner});
+        ctx.events.endGame({winners});
     }
 }
 
@@ -406,32 +473,27 @@ export const EntropyRally = {
             moves: {DistributeEnergy},
             turn: {
                 order: ONCE_SP,
-                endIf: (G, ctx) => (G.players[ctx.playOrderPos].unspentEnergy === 0),
+                endIf: (G, ctx) => (G.players[ctx.playOrderPos].unspentEnergy === 0 || G.players[ctx.playOrderPos].ships.length === 0),
             },
             next: 'planning',
         },
         planning: {
             moves: {PlanCard, FinishPlanning},
             turn: {
-                // TODO allow all players to play
-                // activePlayers: ActivePlayers.ALL,
                 order: ONCE_SP,
                 endIf: (G, ctx) => (G.players[ctx.playOrderPos].finishedPlanning),
             },
-            next: 'chaos',
+            next: (G, ctx) => (G.players.flatMap(player => player.ships).filter(ship => ship.plannedCards.length > 0).length > 0 ? 'chaos' : 'expansion'),
         },
         chaos: {
-            onBegin: MoveLasers,
-            moves: {PlayCard},
+            onBegin: (G, ctx) => {
+                MoveLasers(G, ctx);
+                ResetPlayedThisTurn(G, ctx);
+            },
+            moves: {PlayCard, PlaceShip},
             turn: {
                 order: SHIP_ACTIONS_SP,
-                onBegin: ResetPlayedThisTurn,
                 endIf: AllShipsForPlayerPlayed,
-                stages: {
-                    placeShip: {
-                        moves: {PlaceShip}
-                    }
-                }
             },
             next: (G, ctx) => {
                 return AllShipsFinished(G, ctx) ? 'expansion' : 'chaos';

@@ -32,7 +32,7 @@ export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submit
                 </div>
                 {(active && maxEnergy > 0) ?
                     <div>+<input className="ship-board-energy-input" type="number" value={addEnergy}
-                                 onChange={(ev) => setAddEnergy(parseInt(ev.target.value))} min={0} max={maxEnergy}/>
+                                 onChange={(ev) => setAddEnergy(ev.target.value ? parseInt(ev.target.value) : 0)} min={0} max={maxEnergy}/>
                         <button onClick={submitEnergy}>Add</button>
                     </div>
                     : <div>{ship.titanium}★</div>}

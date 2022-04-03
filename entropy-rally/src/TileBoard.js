@@ -1,13 +1,30 @@
 import React from "react";
 import {GetBorderTiles} from "./Game";
 
-// TODO display tile details
 export function Tile({x, y, owner, tile, onClick}) {
     let cssClass = 'tile-' + (tile || {name: 'border'}).name
     let onClickHandler;
     if (onClick) {
         cssClass += ' clickable';
         onClickHandler = () => onClick(x, y);
+    }
+    const flavorList = [];
+    if (tile) {
+        if (tile.titanium > 0) {
+            flavorList.push(tile.titanium + '★')
+        }
+        if (tile.energy > 0) {
+            flavorList.push(tile.energy + '↯')
+        }
+        if (tile.energyProduction > 0) {
+            flavorList.push(tile.energyProduction + '↯/era');
+        }
+        if (tile.entropyThreshold !== 0) {
+            flavorList.push('< ' + tile.entropyThreshold + ' ✦')
+        }
+        if (tile.entropyChange !== 0) {
+            flavorList.push(tile.entropyChange + ' ✦')
+        }
     }
     const coords = getHexagonCenterScreenCoords(x, y);
     const yoff = coords.y - 60;
@@ -16,6 +33,7 @@ export function Tile({x, y, owner, tile, onClick}) {
             <div className={'tile-top ' + cssClass}/>
             <div className={'tile-middle ' + cssClass} onClick={onClickHandler}>
                 {owner !== null && <div className={'tile-owner player-' + owner}/>}
+                {flavorList.map((flavor, idx) => <div key={idx}>{flavor}</div> )}
             </div>
             <div className={'tile-bottom ' + cssClass}/>
         </div>
@@ -35,6 +53,19 @@ export function Ship({ship}) {
             <div className={cssClass + ' ship-front'}/>
         </div>
     </div>)
+}
+
+export function Laser({laser}) {
+    const coords = getHexagonCenterScreenCoords(laser.x, laser.y);
+    const xoff = coords.x - 16;
+    const yoff = coords.y - 1;
+    return (<div className={'laser laser-' + laser.type} style={{left: xoff + 'px', top: yoff + 'px', transform: 'rotate(' + -laser.rotation + 'deg)'}}>
+        <div className="laser-tail"/>
+        <div className="laser-tail"/>
+        <div className="laser-tail"/>
+        <div className="laser-tail"/>
+        <div className="laser-main"/>
+    </div>);
 }
 
 export function getHexagonCenterScreenCoords(x, y) {
@@ -59,16 +90,17 @@ export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
     }
     let ships = G.players.flatMap(player => player.ships).map(ship =>
         <Ship key={ship.id} ship={ship}/>)
+    let lasers = G.lasers.map(laser => <Laser key={laser.id} laser={laser}/>)
 
     // TODO make scaling controls
     // TODO make translation controls
-    // TODO display lasers
     return (
         <div className="tile-board-outer">
             <div className="tile-board-scaling" style={{transform: 'scale(1)'}}>
                 <div className="tile-board-inner">
                     {tiles}
                     {ships}
+                    {lasers}
                 </div>
             </div>
         </div>

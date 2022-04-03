@@ -153,6 +153,7 @@ table {
     background: #f0f8ff;
     border-radius: 5px;
     margin: 5px 5px;
+    flex-shrink: 0;
 }
 .card-played {
     background: #d2ffc8;
@@ -276,4 +277,24 @@ table {
     left: 20px;
     background: #f0f8ff;
     padding: 7px 15px;
+}
+
+.laser {
+    position: absolute;
+    display: flex;
+}
+.laser-1 div {
+    background-color: #FF0000;
+}
+.laser-2 div {
+    background-color: #044b00;
+}
+.laser-main {
+    width: 16px;
+    height: 2px;
+}
+.laser-tail {
+    margin-right: 2px;
+    width: 2px;
+    height: 2px;
 }
