@@ -114,7 +114,6 @@ function PlaceTile(G, ctx, x, y) {
     if (GetBorderTiles(G).filter(tile => tile.x === x && tile.y === y).length === 0) {
         return INVALID_MOVE;
     }
-    console.log('Place Tile');
     const tile = G.tilePile.pop();
     G.tiles.push(CreateTile(tile, x, y));
     AdjustEntropy(G, ctx, tile.entropyChange);
@@ -126,7 +125,6 @@ function PlaceInitShip(G, ctx, x, y, rotation) {
     if (blockedTiles.filter(tile => tile.x === x && tile.y === y).length > 0) {
         return INVALID_MOVE;
     }
-    console.log('Place Init Ship');
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
     ResolveMovementActions(G, ctx, x, y);
 }
@@ -188,7 +186,6 @@ function DistributeEnergy(G, ctx, shipID, amount) {
     if (!ship) {
         return INVALID_MOVE;
     }
-    console.log('Distribute Energy');
     ship.energy += amount;
     G.players[ctx.playOrderPos].unspentEnergy -= amount;
 }
@@ -202,9 +199,14 @@ function PlanCard(G, ctx, shipID, cardID) {
     if (cardIdx < 0 || cardIdx >= G.players[ctx.playOrderPos].cards.length) {
         return INVALID_MOVE;
     }
-    console.log('Plan Card');
     ship.plannedCards.push(G.players[ctx.playOrderPos].cards[cardIdx]);
     G.players[ctx.playOrderPos].cards.splice(cardIdx, 1);
+}
+
+function FinishDistribution(G, ctx) {
+    if (G.players[ctx.playOrderPos].ships.length > 0) {
+        return INVALID_MOVE;
+    }
 }
 
 function FinishPlanning(G, ctx) {
@@ -212,11 +214,9 @@ function FinishPlanning(G, ctx) {
 }
 
 function MoveLasers(G, ctx) {
-    console.log('Move Lasers');
     for (const laser of G.lasers) {
         laser.x += laser.dx;
         laser.y += laser.dy;
-        console.log('Laser', laser.x, laser.y);
         ResolveMovementActions(G, ctx, laser.x, laser.y);
     }
 }
@@ -245,16 +245,13 @@ function ResolveMovementActions(G, ctx, x, y) {
     const lasers = G.lasers.filter(laser => laser.x === x && laser.y === y);
     const tiles = G.tiles.filter(tile => tile.x === x && tile.y === y);
     const locationsToUpdate = [];
-    console.log('Resolve actions for', x, y);
     for (const laser of lasers) {
         if (laser.type === 1) {
             for (const ship of ships) {
-                console.log('Laser hit ship', ship.id);
                 ship.energy -= 2;
             }
         } else if (laser.type === 2) {
             for (const ship of ships) {
-                console.log('Wave hit ship', ship.id);
                 ship.x += laser.dx;
                 ship.y += laser.dy;
                 if (locationsToUpdate.filter(tile => tile.x === ship.x && tile.y === ship.y).length === 0) {
@@ -272,7 +269,6 @@ function ResolveMovementActions(G, ctx, x, y) {
         for (let i = 0; i < ctx.numPlayers; i++) {
             const otherEnergy = energyLoss[i];
             if (otherEnergy > 0) {
-                console.log('Ships of player', i, 'lose', otherEnergy, 'energy');
                 for (const ship of ships.filter(ship => ship.player === i)) {
                     ship.energy -= otherEnergy;
                 }
@@ -280,13 +276,11 @@ function ResolveMovementActions(G, ctx, x, y) {
         }
     }
     if (ships.length > 0 || tiles.length === 0) {
-        console.log('Delete lasers')
         G.lasers = G.lasers.filter(laser => laser.x !== x || laser.y !== y);
     }
     if (ships.length > 0 && tiles.length === 0) {
         for (const player of G.players) {
             player.ships = player.ships.filter(ship => ship.x !== x || ship.y !== y);
-            console.log('Ships off the map');
         }
     }
     for (const player of G.players) {
@@ -354,7 +348,6 @@ function PlayCard(G, ctx, shipID) {
     if (!ship || ship.playedThisTurn || ship.plannedCards.length === 0) {
         return INVALID_MOVE;
     }
-    console.log('Play Card');
     ship.playedThisTurn = true;
     const card = ship.plannedCards.shift();
     if (ship.energy < card.energy) {
@@ -378,14 +371,12 @@ function PlaceShip(G, ctx, shipID, x, y, rotation) {
     if (G.players.flatMap(player => player.ships).filter(ship => ship.x === x && ship.y === y).length > 0) {
         return INVALID_MOVE;
     }
-    console.log('Place Ship');
     G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y, rotation));
     G.players[ctx.playOrderPos].placingShip = false;
     ResolveMovementActions(G, ctx, x, y);
 }
 
 function ResetPlayedThisTurn(G, ctx) {
-    console.log('Reset Played This Turn');
     for (const ship of G.players.flatMap(player => player.ships)) {
         ship.playedThisTurn = false;
     }
@@ -426,7 +417,7 @@ function CheckEndgame(G, ctx) {
     if (!AllShipsFinished(G, ctx)) {
         return;
     }
-    if (G.entropy === 0 || G.players.filter(player => player.ships.length > 0).length <= 1) {
+    if (G.entropy === 0 || G.players.filter(player => player.ships.length > 0).length === 0) {
         let winner = 0;
         let winners = [0];
         for (let i = 1; i < ctx.numPlayers; i++) {
@@ -455,7 +446,7 @@ export const EntropyRally = {
                 minMoves: 1,
                 maxMoves: 1,
             },
-            endIf: (G, ctx) => (G.tiles.length === 1 + 1 * ctx.numPlayers), // TODO change to 5 per player
+            endIf: (G, ctx) => (G.tiles.length === 1 + 5 * ctx.numPlayers),
             next: 'initShips',
             start: true,
         },
@@ -470,7 +461,7 @@ export const EntropyRally = {
         },
         production: {
             onBegin: PerformProduction,
-            moves: {DistributeEnergy},
+            moves: {DistributeEnergy, FinishDistribution},
             turn: {
                 order: ONCE_SP,
                 endIf: (G, ctx) => (G.players[ctx.playOrderPos].unspentEnergy === 0 || G.players[ctx.playOrderPos].ships.length === 0),

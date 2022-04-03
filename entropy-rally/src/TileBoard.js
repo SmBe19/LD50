@@ -33,7 +33,7 @@ export function Tile({x, y, owner, tile, onClick}) {
             <div className={'tile-top ' + cssClass}/>
             <div className={'tile-middle ' + cssClass} onClick={onClickHandler}>
                 {owner !== null && <div className={'tile-owner player-' + owner}/>}
-                {flavorList.map((flavor, idx) => <div key={idx}>{flavor}</div> )}
+                {flavorList.map((flavor, idx) => <div key={idx}>{flavor}</div>)}
             </div>
             <div className={'tile-bottom ' + cssClass}/>
         </div>
@@ -59,7 +59,8 @@ export function Laser({laser}) {
     const coords = getHexagonCenterScreenCoords(laser.x, laser.y);
     const xoff = coords.x - 16;
     const yoff = coords.y - 1;
-    return (<div className={'laser laser-' + laser.type} style={{left: xoff + 'px', top: yoff + 'px', transform: 'rotate(' + -laser.rotation + 'deg)'}}>
+    return (<div className={'laser laser-' + laser.type}
+                 style={{left: xoff + 'px', top: yoff + 'px', transform: 'rotate(' + -laser.rotation + 'deg)'}}>
         <div className="laser-tail"/>
         <div className="laser-tail"/>
         <div className="laser-tail"/>
@@ -75,11 +76,11 @@ export function getHexagonCenterScreenCoords(x, y) {
     }
 }
 
-export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
+export function TileBoard({ctx, G, onClick, scale, offset, clickableTiles, clickableBorder}) {
 
     const borderTileKey = (tile) => 'b' + (tile.x * 100000 + tile.y);
 
-    let tiles = G.tiles.map(tile =>
+    const tiles = G.tiles.map(tile =>
         clickableTiles ?
             <Tile key={tile.tile.id} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile} onClick={onClick}/> :
             <Tile key={tile.tile.id} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile}/>
@@ -88,15 +89,15 @@ export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
         tiles.push(...GetBorderTiles(G).map(tile =>
             <Tile key={borderTileKey(tile)} x={tile.x} y={tile.y} onClick={onClick}/>));
     }
-    let ships = G.players.flatMap(player => player.ships).map(ship =>
+    const ships = G.players.flatMap(player => player.ships).map(ship =>
         <Ship key={ship.id} ship={ship}/>)
-    let lasers = G.lasers.map(laser => <Laser key={laser.id} laser={laser}/>)
+    const lasers = G.lasers.map(laser => <Laser key={laser.id} laser={laser}/>)
+    const myOffset = offset || {x: 0, y: 0};
 
-    // TODO make scaling controls
-    // TODO make translation controls
     return (
         <div className="tile-board-outer">
-            <div className="tile-board-scaling" style={{transform: 'scale(1)'}}>
+            <div className="tile-board-scaling"
+                 style={{transform: 'scale(' + (scale || 1) + ') translate(' + myOffset.x + 'px, ' + myOffset.y + 'px)'}}>
                 <div className="tile-board-inner">
                     {tiles}
                     {ships}

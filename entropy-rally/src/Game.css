@@ -298,3 +298,15 @@ table {
     width: 2px;
     height: 2px;
 }
+
+.board-controls {
+    position: absolute;
+    top: 100px;
+    right: 0;
+    background: #f0f8ff;
+    padding: 7px;
+}
+
+.board-controls button {
+    width: 40px;
+}

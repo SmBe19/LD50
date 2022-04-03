@@ -7,7 +7,7 @@ const EntropyRallyClient = Client({
     game: EntropyRally,
     board: EntropyRallyBoard,
     multiplayer: Local(),
-    debug: true,
+    debug: false,
 })
 
 const App = () => (
