@@ -15,7 +15,8 @@ function InitTilesBoard({ctx, G, moves, myTurn}) {
 }
 
 function InitShipsBoard({ctx, G, moves, myTurn}) {
-    const onClick = (x, y) => moves.PlaceInitShip(x, y);
+    // TODO allow player to choose rotation
+    const onClick = (x, y) => moves.PlaceInitShip(x, y, 0);
 
     return (
         <div>
