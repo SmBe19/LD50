@@ -260,6 +260,12 @@ function ResolveMovementActions(G, ctx, x, y) {
     for(const player of G.players) {
         player.ships = player.ships.filter(ship => ship.energy >= 0);
     }
+    const aliveShips = ships.filter(ship => ship.energy >= 0);
+    if (tiles.length > 0 && aliveShips.length > 0) {
+        for(const tile of tiles.filter(tile => tile.tile.energyProduction > 0)) {
+            tile.owner = aliveShips[0].player;
+        }
+    }
     for (const location of locationsToUpdate) {
         ResolveMovementActions(G, ctx, location.x, location.y);
     }

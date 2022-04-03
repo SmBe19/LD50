@@ -1,6 +1,7 @@
 import React from "react";
 import {GetBorderTiles} from "./Game";
 
+// TODO display tile details
 export function Tile({x, y, owner, tile, onClick}) {
     let cssClass = 'tile-' + (tile || {name: 'border'}).name
     let onClickHandler;
@@ -61,6 +62,7 @@ export function TileBoard({ctx, G, onClick, clickableTiles, clickableBorder}) {
 
     // TODO make scaling controls
     // TODO make translation controls
+    // TODO display lasers
     return (
         <div className="tile-board-outer">
             <div className="tile-board-scaling" style={{transform: 'scale(1)'}}>

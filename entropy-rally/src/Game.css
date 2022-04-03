@@ -73,9 +73,8 @@ table {
     top: 0;
     left: 0;
     right: 0;
-    bottom: 200px;
+    bottom: 150px;
     overflow: hidden;
-    border-bottom: 1px solid red;
 }
 .tile-board-scaling {
     position: relative;
@@ -105,6 +104,7 @@ table {
     background: transparent;
 }
 .tile-middle {
+    position: relative;
     width: 104px;
     height: 60px;
     text-align: center;
@@ -112,10 +112,10 @@ table {
 
 .tile-owner {
     position: absolute;
-    left: 0;
     right: 0;
     top: 0;
-    height: 20px;
+    bottom: 0;
+    width: 5px;
 }
 
 .ship-wrapper {
@@ -143,9 +143,8 @@ table {
     left: 0;
     right: 0;
     background: #071331;
-    border: 1px solid black;
     display: flex;
-    padding: 5px 0;
+    padding: 5px 5px;
     overflow: auto;
 }
 .card {
@@ -153,7 +152,16 @@ table {
     height: 50px;
     background: #f0f8ff;
     border-radius: 5px;
-    margin: 0 5px;
+    margin: 5px 5px;
+}
+.card-played {
+    background: #d2ffc8;
+}
+.card-discarded {
+    background: #ffe5ec;
+}
+.card-hidden {
+    background: #656e77;
 }
 .card-header {
     display: flex;
@@ -162,9 +170,6 @@ table {
 }
 .card-flavor {
     text-align: center;
-}
-.card-ship-buttons {
-
 }
 .card-ship-buttons button {
     font-size: xx-small;
@@ -234,17 +239,23 @@ table {
     right: 0;
     bottom: 90px;
     display: flex;
+    flex-wrap: wrap;
 }
 .ship-board {
-    background: #f0f8ff;
-    height: 200px;
+    background: #969696;
+    height: 50px;
     margin: 0 5px;
     padding: 2px;
-    width: 150px;
+    width: 160px;
 }
-.ship-board-name {
+.ship-board-large {
+    height: 225px;
+}
+.ship-board-header {
     margin: -2px -2px 2px -2px;
     padding: 2px;
+    display: flex;
+    justify-content: space-between;
 }
 .ship-board-energy-input {
     width: 40px;
@@ -253,4 +264,16 @@ table {
 .ship-board-resources {
     display: flex;
     justify-content: space-between;
+}
+.ship-board-cards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.board-finish-planning {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    background: #f0f8ff;
+    padding: 7px 15px;
 }

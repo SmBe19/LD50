@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {CardList} from "./CardList";
+import {Card, CardList} from "./CardList";
 
 export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submitEnergyAction, playCardAction}) {
     const [addEnergy, setAddEnergy] = useState(0);
@@ -8,10 +8,24 @@ export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submit
         submitEnergyAction(ship.id, addEnergy);
         setAddEnergy(0);
     };
+    const cards = [];
+    cards.push(...ship.playedCards.map(card =>
+        <Card key={card.id} ctx={ctx} G={G} card={card} hidden={false} cssExtension="played"/>));
+    cards.push(...ship.plannedCards.map(card =>
+        <Card key={card.id} ctx={ctx} G={G} card={card} hidden={!cardsVisible}/>));
+    cards.push(...ship.discardedCards.map(card =>
+        <Card key={card.id} ctx={ctx} G={G} card={card} hidden={false} cssExtension="discarded"/>));
+
+    const largeBoard = ctx.phase === 'planning' || ctx.phase === 'chaos';
 
     return (
-        <div className="ship-board" style={{position: 'relative'}}>
-            <div className={'ship-board-name player-' + ship.player}>Ship S{ship.id}</div>
+        <div className={'ship-board' + (largeBoard ? ' ship-board-large' : '')} style={{position: 'relative'}}>
+            <div className={'ship-board-header player-' + ship.player}>
+                <div>Ship S{ship.id}</div>
+                {active && playCardAction && <div>
+                    <button onClick={() => playCardAction(ship.id)}>Play</button>
+                </div>}
+            </div>
             <div className='ship-board-resources'>
                 <div>
                     {ship.energy}↯
@@ -23,15 +37,10 @@ export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submit
                     </div>
                     : <div>{ship.titanium}★</div>}
             </div>
-            {active && playCardAction && <div>
-                <button onClick={() => playCardAction(ship.id)}>Play next card</button>
-            </div>}
-            <div>Planned</div>
-            <CardList ctx={ctx} G={G} cards={ship.plannedCards} hidden={!cardsVisible}/>
-            <div>Played</div>
-            <CardList ctx={ctx} G={G} cards={ship.playedCards} hidden={false}/>
-            <div>Discarded</div>
-            <CardList ctx={ctx} G={G} cards={ship.discardedCards} hidden={false}/>
+
+            <div className="ship-board-cards">
+                {cards}
+            </div>
         </div>
     );
 }

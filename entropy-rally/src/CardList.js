@@ -1,6 +1,6 @@
 import React from "react";
 
-function Card({ctx, G, card, hidden, ships, assignShipAction}) {
+export function Card({ctx, G, card, hidden, cssExtension, ships, assignShipAction}) {
     let flavorText = '';
     switch (card.action) {
         case 'MOVE':
@@ -43,7 +43,7 @@ function Card({ctx, G, card, hidden, ships, assignShipAction}) {
     }
 
     return (
-        <div className="card">
+        <div className={'card' + (cssExtension ? ' card-' + cssExtension : '')}>
             <div className="card-header">
                 <div>{card.entropy !== 0 && card.action !== 'TIDY' ? card.entropy + ' ✦' : ''}</div>
                 <div>{card.energy}↯</div>

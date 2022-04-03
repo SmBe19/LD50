@@ -37,10 +37,14 @@ function ShipPreview({ctx, G, rotation, setRotation}) {
             </div>
             <button className="ship-preview-rotate ship-preview-rotate-0" onClick={() => setRotation(0)}>0°</button>
             <button className="ship-preview-rotate ship-preview-rotate-60" onClick={() => setRotation(60)}>60°</button>
-            <button className="ship-preview-rotate ship-preview-rotate-120" onClick={() => setRotation(120)}>120°</button>
-            <button className="ship-preview-rotate ship-preview-rotate-180" onClick={() => setRotation(180)}>180°</button>
-            <button className="ship-preview-rotate ship-preview-rotate-240" onClick={() => setRotation(240)}>240°</button>
-            <button className="ship-preview-rotate ship-preview-rotate-300" onClick={() => setRotation(300)}>300°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-120" onClick={() => setRotation(120)}>120°
+            </button>
+            <button className="ship-preview-rotate ship-preview-rotate-180" onClick={() => setRotation(180)}>180°
+            </button>
+            <button className="ship-preview-rotate ship-preview-rotate-240" onClick={() => setRotation(240)}>240°
+            </button>
+            <button className="ship-preview-rotate ship-preview-rotate-300" onClick={() => setRotation(300)}>300°
+            </button>
         </div>
     )
 }
@@ -86,14 +90,18 @@ function PlanningBoard({ctx, G, moves, myTurn, playerID}) {
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={false} cardsVisible={false}/>)
 
     return (
-        <div>
+        <Fragment>
             <TileBoard ctx={ctx} G={G}/>
-            {myTurn && <button onClick={() => moves.FinishPlanning()}>Finish Planning</button>}
             <CardList ctx={ctx} G={G} cards={G.players[playerID].cards}
                       ships={myTurn ? G.players[playerID].ships : undefined} assignShipAction={planCardAction}/>
-            {myShipBoards}
-            {otherShipBoards}
-        </div>
+            <div className="board-ships">
+                {myShipBoards}
+                {otherShipBoards}
+            </div>
+            {myTurn && <div className="board-finish-planning">
+                <button onClick={() => moves.FinishPlanning()}>Finish Planning</button>
+            </div>}
+        </Fragment>
     )
 }
 
@@ -108,11 +116,14 @@ function ChaosBoard({ctx, G, moves, myTurn, playerID}) {
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={false} cardsVisible={false}/>)
 
     return (
-        <div>
+        <Fragment>
             <TileBoard ctx={ctx} G={G}/>
-            {myShipBoards}
-            {otherShipBoards}
-        </div>
+            <CardList ctx={ctx} G={G} cards={G.players[playerID].cards}/>
+            <div className="board-ships">
+                {myShipBoards}
+                {otherShipBoards}
+            </div>
+        </Fragment>
     )
 }
 
