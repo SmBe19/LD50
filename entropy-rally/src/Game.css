@@ -1,47 +1,65 @@
-.tile-border {
-    background: #b1b1b1;
-    border-color: #b1b1b1;
+.board-root {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000921;
 }
-.tile-Start {
-    background: #FF0000;
-    border-color: #FF0000;
+.board-gameinfo {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #f0f8ff;
+    padding: 5px 20px;
 }
-.tile-Space {
-    background: #003170;
-    border-color: #003170;
+.board-gamename {
+    font-size: xx-large;
+    font-weight: lighter;
 }
-.tile-Titanium {
-    background: #a64600;
-    border-color: #a64600;
+.board-playername {
+    margin-top: 10px;
+    text-align: right;
 }
-.tile-Energy {
-    background: #dab300;
-    border-color: #dab300;
+.board-entropy {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 200px;
+    padding: 5px;
+    background: #f0f8ff;
+    font-size: xx-large;
+    text-align: center;
+    margin-left: -100px;
 }
-.tile-EnergyPortal {
-    background: #70004d;
-    border-color: #70004d;
+.board-scores {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
-.tile-NeatlyOrganizedSpace {
-    background: #147200;
-    border-color: #147200;
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
 }
-
-.player-0 {
-    background: #83bfff;
-    border-color: #83bfff;
+.board-scores-row {}
+.board-scores-starting-player {
+    padding: 3px 3px 3px 10px;
 }
-.player-1 {
-    background: #79ff7d;
-    border-color: #79ff7d;
+.board-scores-name {}
+.board-scores-score {
+    width: 50px;
+    text-align: right;
+    padding: 3px 10px 3px 2px;
 }
-.player-2 {
-    background: #ee83ff;
-    border-color: #ee83ff;
-}
-.player-3 {
-    background: #ffd483;
-    border-color: #ffd483;
+.board-winner {
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    width: 300px;
+    margin-left: -150px;
+    background: #f0f8ff;
+    text-align: center;
+    padding: 15px 0;
+    font-weight: bold;
+    font-size: xx-large;
 }
 
 .clickable {
@@ -49,11 +67,13 @@
 }
 
 .tile-board-outer {
-    position: relative;
-    width: 500px;
-    height: 500px;
-    border: 1px solid red;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 200px;
     overflow: hidden;
+    border-bottom: 1px solid red;
 }
 .tile-board-scaling {
     position: relative;
@@ -64,8 +84,6 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 100%;
-    height: 100%;
 }
 
 .tile-top {
@@ -131,4 +149,61 @@
 .card-header {
     display: flex;
     justify-content: space-between;
+}
+
+.tile-preview {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    width: 150px;
+    height: 170px;
+    background: #f0f8ff;
+}
+.tile-preview-title {
+    margin-top: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.ship-preview {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    width: 150px;
+    height: 150px;
+    background: #f0f8ff;
+}
+.ship-preview-rotate {
+    width: 40px;
+    height: 20px;
+}
+.ship-preview-rotate-0 {
+    position: absolute;
+    right: 5px;
+    top: 65px;
+}
+.ship-preview-rotate-60 {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+.ship-preview-rotate-120 {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+.ship-preview-rotate-180 {
+    position: absolute;
+    left: 5px;
+    top: 65px;
+}
+.ship-preview-rotate-240 {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+}
+.ship-preview-rotate-300 {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import {GetBorderTiles} from "./Game";
 
-function Tile({x, y, owner, tile, onClick}) {
+export function Tile({x, y, owner, tile, onClick}) {
     let cssClass = 'tile-' + (tile || {name: 'border'}).name
     let onClickHandler;
     if (onClick) {
@@ -21,7 +21,7 @@ function Tile({x, y, owner, tile, onClick}) {
     )
 }
 
-function Ship({ship}) {
+export function Ship({ship}) {
     let cssClass = 'player-' + ship.player
     const coords = getHexagonCenterScreenCoords(ship.x, ship.y);
     const xoff = coords.x - 15;

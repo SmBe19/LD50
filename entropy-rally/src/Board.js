@@ -1,27 +1,58 @@
-import React from 'react';
-import {TileBoard} from "./TileBoard";
+import React, {Fragment, useState} from 'react';
+import {Ship, Tile, TileBoard} from "./TileBoard";
+import './GameColors.css';
 import './Game.css';
 import {ShipBoard} from "./ShipBoard";
 import {CardList} from "./CardList";
 
 function InitTilesBoard({ctx, G, moves, myTurn}) {
     const onClick = (x, y) => moves.PlaceTile(x, y);
+    const nextTile = G.tilePile[G.tilePile.length - 1];
 
     return (
-        <div>
-            <div>Current Tile: {G.tilePile[G.tilePile.length - 1].name}</div>
+        <Fragment>
             <TileBoard ctx={ctx} G={G} clickableBorder={myTurn} onClick={onClick}/>
+            <div className="tile-preview">
+                <div className="tile-preview-title">Next Tile</div>
+                <div className="tile-board-inner">
+                    <Tile x={0} y={0} tile={nextTile}/>
+                </div>
+            </div>
+        </Fragment>
+    )
+}
+
+function ShipPreview({ctx, G, rotation, setRotation}) {
+    const previewShip = {
+        player: ctx.playOrderPos,
+        id: G.lastShipId + 1,
+        x: 0,
+        y: 0,
+        rotation,
+    }
+    return (
+        <div className="ship-preview">
+            <div className="tile-board-inner">
+                <Ship ship={previewShip}/>
+            </div>
+            <button className="ship-preview-rotate ship-preview-rotate-0" onClick={() => setRotation(0)}>0°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-60" onClick={() => setRotation(60)}>60°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-120" onClick={() => setRotation(120)}>120°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-180" onClick={() => setRotation(180)}>180°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-240" onClick={() => setRotation(240)}>240°</button>
+            <button className="ship-preview-rotate ship-preview-rotate-300" onClick={() => setRotation(300)}>300°</button>
         </div>
     )
 }
 
 function InitShipsBoard({ctx, G, moves, myTurn}) {
-    // TODO allow player to choose rotation
-    const onClick = (x, y) => moves.PlaceInitShip(x, y, 0);
+    const [rotation, setRotation] = useState(0);
+    const onClick = (x, y) => moves.PlaceInitShip(x, y, rotation);
 
     return (
         <div>
             <TileBoard ctx={ctx} G={G} clickableTiles={myTurn} onClick={onClick}/>
+            {myTurn && <ShipPreview ctx={ctx} G={G} rotation={rotation} setRotation={setRotation}/>}
         </div>
     )
 }
@@ -99,17 +130,21 @@ function ExpansionBoard({ctx, G, moves, myTurn}) {
 }
 
 function ScoreBoard({ctx, G}) {
-    let winner = '';
-    if (ctx.gameover) {
-        winner = <div id="winner">Winner: {ctx.gameover.winner}</div>;
-    }
-
-    const scoreBoard = G.players.map((player, idx) => <div key={idx} className={'player-' + idx}>Player {idx+1}{G.startingPlayer === idx && <span title="starting player"> ★</span>}: {player.score}</div>)
+    const scoreBoard = G.players.map((player, idx) =>
+        <tr key={idx} className={'board-scores-row player-' + idx}>
+            <td className="board-scores-starting-player">{G.startingPlayer === idx &&
+                <span title="starting player">★</span>}</td>
+            <td className="board-scores-name">Player {idx + 1}</td>
+            <td className="board-scores-score">{player.score}</td>
+        </tr>)
 
     return (
-        <div>
-            {winner}
-            {scoreBoard}
+        <div className="board-scores">
+            <table>
+                <tbody>
+                {scoreBoard}
+                </tbody>
+            </table>
         </div>
     )
 }
@@ -122,24 +157,34 @@ function calculateHexagonParameters(side) {
 }
 
 export function EntropyRallyBoard({ctx, G, moves, playerID}) {
-    let myTurn = ctx.currentPlayer === playerID;
-    const playerIDInt = parseInt(playerID);
+    const myTurn = ctx.currentPlayer === playerID;
+    const playOrderPos = ctx.playOrder.indexOf(playerID);
+    let winner = '';
+    if (ctx.gameover) {
+        winner = (<div className="board-winner">Winner: Player {ctx.gameover.winner}</div>);
+    }
 
     return (
-        <div>
-            <div><h1>Entropy Rally</h1></div>
-            <div><h2 className={'player-' + playerIDInt}>Player {playerIDInt + 1}{G.startingPlayer === playerIDInt && <span title="starting player"> ★</span>}</h2></div>
-            <div>Entropy: {G.entropy}</div>
-            <ScoreBoard ctx={ctx} G={G}/>
+        <div className="board-root">
             {ctx.phase === 'initTiles' && <InitTilesBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn}/>}
             {ctx.phase === 'initShips' && <InitShipsBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn}/>}
             {ctx.phase === 'production' &&
-                <ProductionBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playerIDInt}/>}
+                <ProductionBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playOrderPos}/>}
             {ctx.phase === 'planning' &&
-                <PlanningBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playerIDInt}/>}
+                <PlanningBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playOrderPos}/>}
             {ctx.phase === 'chaos' &&
-                <ChaosBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playerIDInt}/>}
+                <ChaosBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn} playerID={playOrderPos}/>}
             {ctx.phase === 'expansion' && <ExpansionBoard ctx={ctx} G={G} moves={moves} myTurn={myTurn}/>}
+
+            <div className="board-gameinfo">
+                <div className="board-gamename">Entropy Rally</div>
+                <div className="board-playername">Player {playOrderPos + 1}</div>
+            </div>
+            <div className="board-entropy">
+                {G.entropy}
+            </div>
+            <ScoreBoard ctx={ctx} G={G}/>
+            {winner}
         </div>
     );
 }
