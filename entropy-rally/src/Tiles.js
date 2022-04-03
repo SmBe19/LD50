@@ -1,5 +1,6 @@
 function Tile(name, titanium, energy, energyProduction, entropyThreshold, entropyChange) {
     return {
+        id: -1,
         name,
         titanium,
         energy,
@@ -66,6 +67,9 @@ export function GetTilePile() {
     }
     for(let i = 0; i < 2; i++) {
         res.push(ORGANIZED(-200));
+    }
+    for(let i = 0; i < res.length; i++){
+        res[i] = {...res[i], id: i};
     }
     return res;
 }

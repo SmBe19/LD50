@@ -75,13 +75,13 @@ const ONLY_SP = {
 }
 
 function SkipFinishedShipActionsPlayers(G, ctx, idx) {
-    if (!AllShipsForPlayerPlayed(G, ctx, idx)) {
+    if (!AllShipsForPlayerFinished(G, ctx, idx)) {
         return idx;
     }
     let currIdx = idx;
     do {
         currIdx = (currIdx + 1) % ctx.numPlayers;
-    } while (currIdx !== idx && AllShipsForPlayerPlayed(G, ctx, currIdx))
+    } while (currIdx !== idx && AllShipsForPlayerFinished(G, ctx, currIdx))
     if (currIdx !== idx) {
         return currIdx;
     }
@@ -117,6 +117,7 @@ function PerformProduction(G, ctx) {
     for (const tile of G.tiles) {
         if (tile.owner !== null && tile.tile.energyProduction > 0 && tile.tile.entropyThreshold >= G.entropy) {
             G.players[tile.owner].unspentEnergy += tile.tile.energyProduction;
+            AdjustEntropy(G, ctx, tile.tile.energyProduction);
         }
     }
     for (let i = 0; i < ctx.numPlayers; i++) {
@@ -133,7 +134,7 @@ function PerformProduction(G, ctx) {
 }
 
 function GetShipByID(G, ctx, shipID) {
-    return G.players[ctx.playOrderPos].ships.filter(ship => ship.id === shipID).at(0);
+    return G.players[ctx.playOrderPos].ships.filter(ship => ship.id === shipID)[0];
 }
 
 function DistributeEnergy(G, ctx, shipID, amount) {
@@ -148,16 +149,17 @@ function DistributeEnergy(G, ctx, shipID, amount) {
     G.players[ctx.playOrderPos].unspentEnergy -= amount;
 }
 
-function PlanCard(G, ctx, shipID, cardIdx) {
+function PlanCard(G, ctx, shipID, cardID) {
     const ship = GetShipByID(G, ctx, shipID);
     if (!ship) {
         return INVALID_MOVE;
     }
-    if (cardIdx >= G.players[ctx.playOrderPos].cards.length) {
+    const cardIdx = G.players[ctx.playOrderPos].cards.map(card => card.id).indexOf(cardID);
+    if (cardIdx < 0 || cardIdx >= G.players[ctx.playOrderPos].cards.length) {
         return INVALID_MOVE;
     }
-    ship.cards.push(G.players[ctx.playOrderPos].cards[cardIdx]);
-    G.players[ctx.playOrderPos].cards = G.players[ctx.playOrderPos].cards.splice(cardIdx, 1);
+    ship.plannedCards.push(G.players[ctx.playOrderPos].cards[cardIdx]);
+    G.players[ctx.playOrderPos].cards.splice(cardIdx, 1);
 }
 
 function FinishPlanning(G, ctx) {
@@ -221,7 +223,7 @@ function HandleCardAction(G, ctx, ship, card) {
         case 'TIDY':
             break;
         default:
-            console.log('Unknown card action', card.action());
+            console.log('Unknown card action', card.action);
     }
 }
 
@@ -334,7 +336,8 @@ export const EntropyRally = {
         planning: {
             moves: {PlanCard, FinishPlanning},
             turn: {
-                activePlayers: ActivePlayers.ALL,
+                // TODO allow all players to play
+                // activePlayers: ActivePlayers.ALL,
                 order: ONCE_SP,
                 endIf: (G, ctx) => (G.players[ctx.playOrderPos].finishedPlanning),
             },

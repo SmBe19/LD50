@@ -1,5 +1,6 @@
 function Card(energy, entropy, action, actionArg) {
     return {
+        id: -1,
         energy,
         entropy,
         action,
@@ -15,8 +16,8 @@ const TURN_2 = Card(1, 0, 'TURN', 120);
 const TURN_3 = Card(1, 0, 'TURN', 180);
 const TURN_4 = Card(1, 0, 'TURN', 240);
 const TURN_5 = Card(1, 0, 'TURN', 300);
-const LASER = Card(1, 0, 'SHOOT', 1);
-const GRAVITY = Card(1, 0, 'SHOOT', 2);
+const LASER = Card(2, 0, 'SHOOT', 1);
+const GRAVITY = Card(2, 0, 'SHOOT', 2);
 const PORTAL = Card(10, 5, 'PORTAL', 0);
 const SHIP = Card(10, 0, 'SHIP', 0);
 const TIDY = Card(5, -20, 'TIDY', 0);
@@ -50,6 +51,9 @@ export function GetCardPile() {
     }
     for(let i = 0; i < 10; i++) {
         res.push(TIDY);
+    }
+    for(let i = 0; i < res.length; i++){
+        res[i] = {...res[i], id: i};
     }
     return res;
 }

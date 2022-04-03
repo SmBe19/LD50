@@ -53,6 +53,7 @@
     width: 500px;
     height: 500px;
     border: 1px solid red;
+    overflow: hidden;
 }
 .tile-board-scaling {
     position: relative;
@@ -89,6 +90,14 @@
     text-align: center;
 }
 
+.tile-owner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 20px;
+}
+
 .ship-wrapper {
     display: flex;
     transform-origin: 15px 10px;
@@ -104,4 +113,22 @@
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     background: transparent;
+}
+
+.card-list {
+    height: 70px;
+    background: #eaeaea;
+    border: 1px solid black;
+    display: flex;
+}
+
+.card {
+    width: 150px;
+    height: 70px;
+    border: 1px solid green;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
 }
