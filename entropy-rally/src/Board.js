@@ -50,18 +50,15 @@ function InitShipsBoard({ctx, G, moves, myTurn}) {
     const onClick = (x, y) => moves.PlaceInitShip(x, y, rotation);
 
     return (
-        <div>
+        <Fragment>
             <TileBoard ctx={ctx} G={G} clickableTiles={myTurn} onClick={onClick}/>
             {myTurn && <ShipPreview ctx={ctx} G={G} rotation={rotation} setRotation={setRotation}/>}
-        </div>
+        </Fragment>
     )
 }
 
 function ProductionBoard({ctx, G, moves, myTurn, playerID}) {
     const distributeEnergyAction = (shipID, amount) => moves.DistributeEnergy(shipID, amount);
-    const playerAmounts = G.players.map((player, idx) => {
-        return <div key={idx} className={'player-' + idx}>Player {idx + 1}: {player.unspentEnergy}</div>
-    })
     const myShipBoards = G.players[playerID].ships.map(ship =>
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={myTurn} cardsVisible={true}
                    maxEnergy={G.players[ctx.playOrderPos].unspentEnergy} submitEnergyAction={distributeEnergyAction}/>);
@@ -69,13 +66,14 @@ function ProductionBoard({ctx, G, moves, myTurn, playerID}) {
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={false} cardsVisible={false}/>)
 
     return (
-        <div>
-            {playerAmounts}
+        <Fragment>
             <TileBoard ctx={ctx} G={G}/>
             <CardList ctx={ctx} G={G} cards={G.players[playerID].cards}/>
-            {myShipBoards}
-            {otherShipBoards}
-        </div>
+            <div className="board-ships">
+                {myShipBoards}
+                {otherShipBoards}
+            </div>
+        </Fragment>
     )
 }
 
@@ -131,11 +129,12 @@ function ExpansionBoard({ctx, G, moves, myTurn}) {
 
 function ScoreBoard({ctx, G}) {
     const scoreBoard = G.players.map((player, idx) =>
-        <tr key={idx} className={'board-scores-row player-' + idx}>
+        <tr key={idx} className={'player-' + idx}>
             <td className="board-scores-starting-player">{G.startingPlayer === idx &&
                 <span title="starting player">★</span>}</td>
-            <td className="board-scores-name">Player {idx + 1}</td>
-            <td className="board-scores-score">{player.score}</td>
+            <td>Player {idx + 1}</td>
+            {ctx.phase === 'production' && <td className="board-scores-energy">{player.unspentEnergy}↯</td>}
+            <td className="board-scores-score">{player.score}★</td>
         </tr>)
 
     return (
@@ -181,7 +180,7 @@ export function EntropyRallyBoard({ctx, G, moves, playerID}) {
                 <div className="board-playername">Player {playOrderPos + 1}</div>
             </div>
             <div className="board-entropy">
-                {G.entropy}
+                {G.entropy} ✦
             </div>
             <ScoreBoard ctx={ctx} G={G}/>
             {winner}

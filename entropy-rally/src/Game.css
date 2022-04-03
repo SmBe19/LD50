@@ -39,15 +39,17 @@ table {
     border-spacing: 0;
     border-collapse: collapse;
 }
-.board-scores-row {}
 .board-scores-starting-player {
     padding: 3px 3px 3px 10px;
 }
-.board-scores-name {}
 .board-scores-score {
     width: 50px;
     text-align: right;
     padding: 3px 10px 3px 2px;
+}
+.board-scores-energy {
+    width: 70px;
+    text-align: right;
 }
 .board-winner {
     position: absolute;
@@ -123,6 +125,7 @@ table {
 .ship-middle {
     width: 30px;
     height: 20px;
+    text-align: center;
 }
 .ship-front {
     height: 0;
@@ -134,21 +137,38 @@ table {
 }
 
 .card-list {
+    position: absolute;
     height: 70px;
-    background: #eaeaea;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #071331;
     border: 1px solid black;
     display: flex;
+    padding: 5px 0;
+    overflow: auto;
 }
-
 .card {
-    width: 150px;
-    height: 70px;
-    border: 1px solid green;
+    width: 70px;
+    height: 50px;
+    background: #f0f8ff;
+    border-radius: 5px;
+    margin: 0 5px;
 }
-
 .card-header {
     display: flex;
     justify-content: space-between;
+    padding: 2px 2px;
+}
+.card-flavor {
+    text-align: center;
+}
+.card-ship-buttons {
+
+}
+.card-ship-buttons button {
+    font-size: xx-small;
+    padding: 2px 3px;
 }
 
 .tile-preview {
@@ -206,4 +226,31 @@ table {
     position: absolute;
     right: 20px;
     bottom: 20px;
+}
+
+.board-ships {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 90px;
+    display: flex;
+}
+.ship-board {
+    background: #f0f8ff;
+    height: 200px;
+    margin: 0 5px;
+    padding: 2px;
+    width: 150px;
+}
+.ship-board-name {
+    margin: -2px -2px 2px -2px;
+    padding: 2px;
+}
+.ship-board-energy-input {
+    width: 40px;
+    text-align: right;
+}
+.ship-board-resources {
+    display: flex;
+    justify-content: space-between;
 }

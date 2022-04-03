@@ -4,37 +4,37 @@ function Card({ctx, G, card, hidden, ships, assignShipAction}) {
     let flavorText = '';
     switch (card.action) {
         case 'MOVE':
-            flavorText = 'Move ' + card.actionArg + ' tiles';
+            flavorText = card.actionArg + '↑';
             break;
         case 'TURN':
             if (card.actionArg < 180) {
-                flavorText = 'Rotate left ' + card.actionArg + '°';
+                flavorText = card.actionArg + '° ↺';
             } else {
-                flavorText = 'Rotate right ' + (360 - card.actionArg) + '°';
+                flavorText = (360 - card.actionArg) + '° ↻';
             }
             break;
         case 'SHOOT':
             if (card.actionArg === 1) {
-                flavorText = 'Shoot laser';
+                flavorText = '⦿';
             } else if (card.actionArg === 2) {
-                flavorText = 'Trigger gravitational wave';
+                flavorText = '🌊';
             }
             break;
         case 'PORTAL':
-            flavorText = 'Ship titanium';
+            flavorText = '🚀';
             break;
         case 'SHIP':
-            flavorText = 'Build new ship';
+            flavorText = '➤';
             break;
         case 'TIDY':
-            flavorText = 'Tidy up space';
+            flavorText = card.entropy + ' ✦';
             break;
         default:
             console.log('Unknown card action', card.action);
     }
 
-    const buttons = ships ? ships.map((ship) => <button key={ship.id}
-                                                        onClick={() => assignShipAction(ship.id, card.id)}>S{ship.id}</button>) : []
+    const buttons = ships ? ships.map((ship) =>
+        <button key={ship.id} onClick={() => assignShipAction(ship.id, card.id)}>S{ship.id}</button>) : []
 
     if (hidden) {
         return (
@@ -45,10 +45,12 @@ function Card({ctx, G, card, hidden, ships, assignShipAction}) {
     return (
         <div className="card">
             <div className="card-header">
-                <div>{card.energy}</div>
-                <div>{card.entropy !== 0 ? card.entropy : ''}</div>
+                <div>{card.entropy !== 0 && card.action !== 'TIDY' ? card.entropy + ' ✦' : ''}</div>
+                <div>{card.energy}↯</div>
             </div>
-            {flavorText}
+            <div className="card-flavor">
+                {flavorText}
+            </div>
             {buttons.length > 0 && <div className="card-ship-buttons">{buttons}</div>}
         </div>
     )
