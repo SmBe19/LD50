@@ -89,6 +89,15 @@ function PerformProduction(G, ctx) {
 }
 
 function DistributeEnergy(G, ctx, shipID, amount) {
+    if (G.players[ctx.playOrderPos].unspentEnergy < amount) {
+        return INVALID_MOVE;
+    }
+    const ship = G.players[ctx.playOrderPos].ships.filter(ship => ship.id === shipID).at(0);
+    if (!ship) {
+        return INVALID_MOVE;
+    }
+    ship.energy += amount;
+    G.players[ctx.playOrderPos].unspentEnergy -= amount;
 }
 
 function PlanCard(G, ctx) {

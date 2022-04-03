@@ -31,7 +31,7 @@ function ProductionBoard({ctx, G, moves, myTurn, playerID}) {
     })
     const myShipBoards = G.players[playerID].ships.map(ship =>
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={myTurn}/>);
-    const otherShipBoards = G.players.filter((player, idx) => idx != playerID).flatMap(player => player.ships).map(ship =>
+    const otherShipBoards = G.players.filter((player, idx) => idx !== playerID).flatMap(player => player.ships).map(ship =>
         <ShipBoard key={ship.id} ctx={ctx} G={G} ship={ship} active={false}/>)
 
     return (
