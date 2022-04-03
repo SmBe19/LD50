@@ -137,10 +137,10 @@ function PerformProduction(G, ctx) {
         }
     }
     for (let i = 0; i < ctx.numPlayers; i++) {
-        for (let j = 0; j < 3 + 2 * G.players[i].ships.length; j++) {
+        for (let j = 0; j < 5 * G.players[i].ships.length; j++) {
             G.players[i].cards.push(G.cardPile.pop());
         }
-        G.players[i].unspentEnergy += 10;
+        G.players[i].unspentEnergy += 50;
         G.players[i].finishedPlanning = false;
         for (const ship of G.players[i].ships) {
             ship.playedCards = [];

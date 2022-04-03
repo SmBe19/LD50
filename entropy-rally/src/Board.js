@@ -15,7 +15,7 @@ function InitTilesBoard({ctx, G, moves, myTurn, scale, offset}) {
             <div className="tile-preview">
                 <div className="tile-preview-title">Next Tile</div>
                 <div className="tile-board-inner">
-                    <Tile x={0} y={0} tile={nextTile}/>
+                    <Tile G={G} x={0} y={0} tile={nextTile}/>
                 </div>
             </div>
         </Fragment>
@@ -146,7 +146,7 @@ function ExpansionBoard({ctx, G, moves, myTurn, scale, offset}) {
             <div className="tile-preview">
                 <div className="tile-preview-title">Next Tile</div>
                 <div className="tile-board-inner">
-                    <Tile x={0} y={0} tile={nextTile}/>
+                    <Tile G={G} x={0} y={0} tile={nextTile}/>
                 </div>
             </div>
         </Fragment>

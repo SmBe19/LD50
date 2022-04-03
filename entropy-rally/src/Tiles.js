@@ -23,51 +23,54 @@ export function GetTilePile() {
     for(let i = 0; i < 50; i++) {
         res.push(SPACE);
     }
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < 30; i++) {
         res.push(TITANIUM(2));
     }
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < 30; i++) {
         res.push(TITANIUM(3));
     }
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < 30; i++) {
         res.push(TITANIUM(4));
     }
-    for(let i = 0; i < 10; i++) {
-        res.push(ENERGY(5));
+    for(let i = 0; i < 20; i++) {
+        res.push(ENERGY(200));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(ENERGY(20));
+        res.push(ENERGY(500));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(3, 0));
+        res.push(PORTAL(10, 0));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(5, 0));
+        res.push(PORTAL(20, 0));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(7, -100));
+        res.push(PORTAL(40, -200));
     }
-    for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(10, -200));
+    for(let i = 0; i < 5; i++) {
+        res.push(PORTAL(70, -400));
     }
-    for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(15, -300));
-    }
-    for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(20, -400));
-    }
-    for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(25, -500));
-    }
-    for(let i = 0; i < 10; i++) {
-        res.push(ORGANIZED(-10));
-    }
-    for(let i = 0; i < 10; i++) {
-        res.push(ORGANIZED(-50));
+    for(let i = 0; i < 5; i++) {
+        res.push(PORTAL(100, -700));
     }
     for(let i = 0; i < 2; i++) {
-        res.push(ORGANIZED(-200));
+        res.push(PORTAL(200, -500));
     }
+    for(let i = 0; i < 2; i++) {
+        res.push(PORTAL(300, -500));
+    }
+    for(let i = 0; i < 20; i++) {
+        res.push(ORGANIZED(-10));
+    }
+    for(let i = 0; i < 20; i++) {
+        res.push(ORGANIZED(-30));
+    }
+    for(let i = 0; i < 3; i++) {
+        res.push(ORGANIZED(-100));
+    }
+    res.push(...res);
+    res.push(...res);
+    res.push(...res);
     for(let i = 0; i < res.length; i++){
         res[i] = {...res[i], id: i};
     }

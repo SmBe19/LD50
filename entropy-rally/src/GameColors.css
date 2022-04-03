@@ -22,6 +22,10 @@
     background: #70004d;
     border-color: #70004d;
 }
+.tile-EnergyPortal-disabled {
+    background: #2c0020;
+    border-color: #2c0020;
+}
 .tile-NeatlyOrganizedSpace {
     background: #147200;
     border-color: #147200;

@@ -2,7 +2,15 @@ import React, {useState} from "react";
 import {Card, CardList} from "./CardList";
 
 export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submitEnergyAction, playCardAction}) {
-    const [addEnergy, setAddEnergy] = useState(0);
+    const [addEnergy, setAddEnergy] = useState(maxEnergy);
+    const [lastMaxEnergy, setLastMaxEnergy] = useState(0);
+    if (addEnergy > maxEnergy) {
+        setAddEnergy(maxEnergy);
+    }
+    if (lastMaxEnergy !== maxEnergy) {
+        setLastMaxEnergy(maxEnergy);
+        setAddEnergy(maxEnergy);
+    }
 
     const submitEnergy = () => {
         submitEnergyAction(ship.id, addEnergy);

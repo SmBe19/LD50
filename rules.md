@@ -15,14 +15,14 @@ The game now progresses in eras until entropy reaches zero.
 Each era progresses in multiple consecutive phases, in the order as they are described. If something is stated to happen in turns, this always starts with the current starting player.
 
 ### Draw cards
-Each player draws 3 cards plus 2 additional cards for each ship they own.
+Each player draws 5 cards for each ship they own.
 
 ### Production
 Each energy portal has an associated entropy level after which it stops working. An energy portal is considered active if the global entropy level is not above its level.
 
 A player receives the denoted amount of energy for all its active energy portals and the global entropy increases by the same amount. Entropy is capped at zero and as soon as entropy reaches zero, it will never decrease again (even if corresponding cards or tiles would be played) and this is the last era.
 
-Additionally, each player receives 10 energy for free.
+Additionally, each player receives 50 energy for free.
 
 In turn, each player distributes all their energy onto their ships.
 

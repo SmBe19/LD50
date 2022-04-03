@@ -1,8 +1,11 @@
 import React from "react";
 import {GetBorderTiles} from "./Game";
 
-export function Tile({x, y, owner, tile, onClick}) {
+export function Tile({G, x, y, owner, tile, onClick}) {
     let cssClass = 'tile-' + (tile || {name: 'border'}).name
+    if (tile && tile.entropyThreshold < G.entropy) {
+        cssClass += '-disabled'
+    }
     let onClickHandler;
     if (onClick) {
         cssClass += ' clickable';
@@ -82,12 +85,12 @@ export function TileBoard({ctx, G, onClick, scale, offset, clickableTiles, click
 
     const tiles = G.tiles.map(tile =>
         clickableTiles ?
-            <Tile key={tile.tile.id} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile} onClick={onClick}/> :
-            <Tile key={tile.tile.id} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile}/>
+            <Tile key={tile.tile.id} G={G} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile} onClick={onClick}/> :
+            <Tile key={tile.tile.id} G={G} x={tile.x} y={tile.y} owner={tile.owner} tile={tile.tile}/>
     );
     if (clickableBorder === true) {
         tiles.push(...GetBorderTiles(G).map(tile =>
-            <Tile key={borderTileKey(tile)} x={tile.x} y={tile.y} onClick={onClick}/>));
+            <Tile key={borderTileKey(tile)} G={G} x={tile.x} y={tile.y} onClick={onClick}/>));
     }
     const ships = G.players.flatMap(player => player.ships).map(ship =>
         <Ship key={ship.id} ship={ship}/>)
