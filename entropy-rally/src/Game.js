@@ -437,6 +437,7 @@ function NextStartingPlayer(G, ctx) {
 }
 
 export const EntropyRally = {
+    name: 'entropy-rally',
     setup: Setup,
     moves: {},
     phases: {
@@ -503,4 +504,6 @@ export const EntropyRally = {
         },
     },
     ai: EntropyRallyAi,
+    minPlayers: 2,
+    maxPlayers: 4,
 }

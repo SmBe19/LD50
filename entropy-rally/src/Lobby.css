@@ -1,0 +1,13 @@
+.lobby-title {
+    padding-left: 50px;
+}
+.rules {
+    padding-left: 50px;
+}
+.go-fullscreen {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 5px;
+    background: #ff6c6c;
+}

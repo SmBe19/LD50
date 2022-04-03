@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Card, CardList} from "./CardList";
+import {Card} from "./CardList";
 
 export function ShipBoard({ctx, G, ship, active, cardsVisible, maxEnergy, submitEnergyAction, playCardAction}) {
     const [addEnergy, setAddEnergy] = useState(maxEnergy);
