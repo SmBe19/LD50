@@ -10,6 +10,7 @@ function Setup(ctx) {
         tilePile: ctx.random.Shuffle(GetTilePile()),
         cardPile: ctx.random.Shuffle(GetCardPile()),
         startingPlayer: 0,
+        lastShipId: 0,
         players: Array(ctx.numPlayers).fill({
             score: 0,
             cards: [],
@@ -29,10 +30,14 @@ function TileAt(tile, x, y) {
     }
 }
 
-function CreateShip(x, y) {
+function CreateShip(G, player, x, y) {
+    G.lastShipId++;
     return {
+        id: G.lastShipId,
+        player,
         x,
         y,
+        rotation: 0, // TODO maybe the player should be able to choose this?
         energy: 0,
         titanium: 0,
         plannedCards: [],
@@ -72,7 +77,7 @@ function PlaceTile(G, ctx, x, y) {
 
 function PlaceInitShip(G, ctx, x, y) {
     // TODO check that it is not adjacent to other ship
-    G.players[ctx.playOrderPos].ships.push(CreateShip(x, y));
+    G.players[ctx.playOrderPos].ships.push(CreateShip(G, ctx.playOrderPos, x, y));
 }
 
 function PerformProduction(G, ctx) {
@@ -83,7 +88,7 @@ function PerformProduction(G, ctx) {
     }
 }
 
-function DistributeEnergy(G, ctx) {
+function DistributeEnergy(G, ctx, shipID, amount) {
 }
 
 function PlanCard(G, ctx) {
@@ -125,8 +130,6 @@ function NextStartingPlayer(G, ctx) {
     G.startingPlayer = (G.startingPlayer + 1) % ctx.numPlayers;
 }
 
-// TODO correctly set starting player
-
 export const EntropyRally = {
     setup: Setup,
     moves: {},
@@ -137,7 +140,7 @@ export const EntropyRally = {
                 minMoves: 1,
                 maxMoves: 1,
             },
-            endIf: (G, ctx) => (G.tiles.length === 1 + 5 * ctx.numPlayers),
+            endIf: (G, ctx) => (G.tiles.length === 1 + 1 * ctx.numPlayers), // TODO change to 5 per player
             next: 'initShips',
             start: true,
         },
