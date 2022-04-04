@@ -15,7 +15,7 @@ The game now progresses in eras until entropy reaches zero.
 Each era progresses in multiple consecutive phases, in the order as they are described. If something is stated to happen in turns, this always starts with the current starting player.
 
 ### Draw cards
-Each player draws 5 cards for each ship they own.
+Each player 2 cards from the action pile and 5 cards for each ship they own from the movement pile.
 
 ### Production
 Each energy portal has an associated entropy level after which it stops working. An energy portal is considered active if the global entropy level is not above its level.
@@ -79,23 +79,26 @@ Reduces global entropy level by the specified amount when placed.
 ## Cards
 Each card indicates the number of energy which is required to play it and optionally the change in entropy playing this card causes. There are the following types of cards:
 
-### Move 1, Move 2, Move 3
+### Move 1, Move 2, Move 3 (Movement)
 Move the ship in its current direction 1, 2, or 3 steps (depending on card).
 
-### Turn Right 60°, Turn Right 120°, Turn 180°, Turn Left 120°, Turn Left 60°
+### Turn Right 60°, Turn Right 120°, Turn 180°, Turn Left 120°, Turn Left 60° (Movement)
 Turn the direction of the ship by the specified amount.
 
-### Shoot Laser
+### Shoot Laser (Movement & Action)
 Shoots a laser in the current direction. The laser token is placed one tile ahead of the ship's current tile. It will move one step each round.
 
-### Send Gravitational Wave
+### Send Gravitational Wave (Movement & Action)
 Send out a gravitational wave in the current direction. The wave token is placed one tile ahead of the ship's current tile. It will move one step each round.
 
-### Titanium Portal
+### Titanium Portal (Action)
 Open a portal into the new universe and transport any number of titanium currently on the ship. The required energy is independent of the amount of titanium transported. The transported titanium is removed from the ship and the player receives a point for each transported titanium.
 
-### Build Ship
+### Build Ship (Action)
 The player receives an additional ship. They may place the ship on any tile adjacent to the ship which played the card.
 
-### Tidy Up Space
+### Tidy Up Space (Action)
 Reduce global entropy by the specified amount.
+
+### Induce Chaos (Action)
+Increase global entropy by the specified amount.

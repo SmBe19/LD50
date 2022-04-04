@@ -1,0 +1,9 @@
+Entropy Rally is a board game for two persons. Grab a friend and give it a try!
+
+Here are the rules, you should read them before trying to play the game: https://github.com/SmBe19/LD50/blob/master/rules.md
+
+We made an online version of the game so you can play it across the internet with your friends.
+
+## Team
+- Design: Stefanie Zbinden & Benjamin Schmid
+- Development & Art: Benjamin Schmid
