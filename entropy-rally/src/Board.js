@@ -207,9 +207,9 @@ export function EntropyRallyBoard({ctx, G, moves, playerID}) {
     if (ctx.gameover) {
         if (ctx.gameover.winners.length > 1) {
             winner = (<div
-                className="board-winner">Winners: {ctx.gameover.winners.map(winner => 'Player ' + winner).join(', ')}</div>);
+                className="board-winner">Winners: {ctx.gameover.winners.map(winner => 'Player ' + (winner + 1)).join(', ')}</div>);
         } else {
-            winner = (<div className="board-winner">Winner: Player {ctx.gameover.winner}</div>);
+            winner = (<div className="board-winner">Winner: Player {ctx.gameover.winners[0]+1}</div>);
         }
     }
 

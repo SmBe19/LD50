@@ -1,5 +1,10 @@
 import React from "react";
 
+function isCardTooExpensive(ship, card) {
+    const available = ship.energy - ship.plannedCards.map(card => card.energy).reduce((a, b) => a+b, 0);
+    return card.energy > available;
+}
+
 export function Card({ctx, G, card, hidden, cssExtension, ships, assignShipAction}) {
     let flavorText = '';
     switch (card.action) {
@@ -34,7 +39,7 @@ export function Card({ctx, G, card, hidden, cssExtension, ships, assignShipActio
     }
 
     const buttons = ships ? ships.map((ship) =>
-        <button key={ship.id} onClick={() => assignShipAction(ship.id, card.id)}>S{ship.id}</button>) : []
+        <button key={ship.id} onClick={() => assignShipAction(ship.id, card.id)} className={isCardTooExpensive(ship, card) ? 'card-too-expensive' : ''}>S{ship.id}</button>) : []
 
     if (hidden) {
         return (
@@ -57,10 +62,12 @@ export function Card({ctx, G, card, hidden, cssExtension, ships, assignShipActio
 }
 
 export function CardList({ctx, G, cards, hidden, ships, assignShipAction}) {
+    const sortedCards = cards.slice();
+    sortedCards.sort((a, b) => a.sortArg - b.sortArg);
     return (
         <div className="card-list">
-            {cards.map(card => <Card key={card.id} ctx={ctx} G={G} card={card} hidden={hidden} ships={ships}
-                                     assignShipAction={assignShipAction}/>)}
+            {sortedCards.map(card => <Card key={card.id} ctx={ctx} G={G} card={card} hidden={hidden} ships={ships}
+                                           assignShipAction={assignShipAction}/>)}
         </div>
     );
 }

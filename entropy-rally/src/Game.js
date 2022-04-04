@@ -4,10 +4,12 @@ import {GetCardPile} from "./Cards";
 import {GetTilePile, START_TILE} from "./Tiles";
 
 function Setup(ctx) {
+    const [movement, actions] = GetCardPile();
     return {
         entropy: -1000,
         tilePile: ctx.random.Shuffle(GetTilePile()),
-        cardPile: ctx.random.Shuffle(GetCardPile()),
+        cardPileActions: ctx.random.Shuffle(actions),
+        cardPileMovement: ctx.random.Shuffle(movement),
         startingPlayer: 0,
         lastShipId: 0,
         lastLaserId: 0,
@@ -138,7 +140,10 @@ function PerformProduction(G, ctx) {
     }
     for (let i = 0; i < ctx.numPlayers; i++) {
         for (let j = 0; j < 5 * G.players[i].ships.length; j++) {
-            G.players[i].cards.push(G.cardPile.pop());
+            G.players[i].cards.push(G.cardPileMovement.pop());
+        }
+        for (let j = 0; j < 2; j++) {
+            G.players[i].cards.push(G.cardPileActions.pop());
         }
         G.players[i].unspentEnergy += 50;
         G.players[i].finishedPlanning = false;
@@ -240,6 +245,22 @@ function GetDeltaFromRotation(rotation) {
     }
 }
 
+function RevivePlayer(G, ctx, playerIdx) {
+    G.tiles.forEach(tile => {
+        if (tile.owner === playerIdx) {
+            tile.owner = null;
+        }
+    });
+    G.players[playerIdx].cards = [];
+    const locations = [{x: 0, y: 0}, ...GetNeighbors({x: 0, y: 0})];
+    for (const location of locations) {
+        if (G.players.flatMap(player => player.ships).filter(ship => ship.x === location.x && ship.y === location.y).length === 0) {
+            G.players[playerIdx].ships.push(CreateShip(G, playerIdx, location.x, location.y, 0));
+            break;
+        }
+    }
+}
+
 function ResolveMovementActions(G, ctx, x, y) {
     const ships = G.players.flatMap(player => player.ships).filter(ship => ship.x === x && ship.y === y);
     const lasers = G.lasers.filter(laser => laser.x === x && laser.y === y);
@@ -248,7 +269,7 @@ function ResolveMovementActions(G, ctx, x, y) {
     for (const laser of lasers) {
         if (laser.type === 1) {
             for (const ship of ships) {
-                ship.energy -= 2;
+                ship.energy -= 20;
             }
         } else if (laser.type === 2) {
             for (const ship of ships) {
@@ -300,6 +321,13 @@ function ResolveMovementActions(G, ctx, x, y) {
             }
             if (tile.energyProduction > 0) {
                 tileWrapper.owner = aliveShips[0].player;
+            }
+        }
+    }
+    if (ctx.phase !== 'initShips' && ctx.phase !== 'initTiles') {
+        for (let i = 0; i < ctx.numPlayers; i++) {
+            if (G.players[i].ships.length === 0) {
+                RevivePlayer(G, ctx, i);
             }
         }
     }

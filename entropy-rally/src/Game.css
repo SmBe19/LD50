@@ -310,3 +310,7 @@ table {
 .board-controls button {
     width: 40px;
 }
+
+.card-too-expensive {
+    background: #ff9393;
+}

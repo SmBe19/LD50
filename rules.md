@@ -34,7 +34,7 @@ The chaos phase consists of multiple rounds.
 
 In each round, first all lasers and gravitational waves are moved by one tile.
 
-If a ship is hit by a laser, it loses 2 energy. The laser disappears. If the ship has now less than zero energy, all its titanium is discarded and the ship is removed from the game. If a player does not have any ships left, they can no longer play and their final score is the number of points they currently have.
+If a ship is hit by a laser, it loses 20 energy. The laser disappears. If the ship has now less than zero energy, all its titanium is discarded and the ship is removed from the game. If a player does not have any ships left, they get a new ship on the starting tile (or adjacent if it is already occupied). However, they lose all their cards and energy portals.
 
 If a ship is hit by a gravitational wave, it is moved one tile into the direction of the wave. The wave disappears.
 
