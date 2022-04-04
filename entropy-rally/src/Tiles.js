@@ -65,19 +65,19 @@ export function GetTilePile() {
         res.push(PORTAL(20, 0));
     }
     for(let i = 0; i < 20; i++) {
-        res.push(PORTAL(40, -200));
+        res.push(PORTAL(30, -200));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(70, -400));
+        res.push(PORTAL(50, -400));
     }
     for(let i = 0; i < 10; i++) {
-        res.push(PORTAL(100, -500));
+        res.push(PORTAL(70, -500));
     }
     for(let i = 0; i < 3; i++) {
-        res.push(PORTAL(200, -600));
+        res.push(PORTAL(150, -600));
     }
     for(let i = 0; i < 3; i++) {
-        res.push(PORTAL(300, -700));
+        res.push(PORTAL(200, -700));
     }
     for(let i = 0; i < 20; i++) {
         res.push(ORGANIZED(-20));

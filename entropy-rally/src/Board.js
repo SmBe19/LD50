@@ -77,8 +77,8 @@ function ProductionBoard({ctx, G, moves, myTurn, playerID, scale, offset}) {
                 {myShipBoards}
                 {otherShipBoards}
             </div>
-            {myTurn && G.players[ctx.playOrderPos].ships.length === 0 && <div className="board-finish-planning">
-                <button onClick={() => moves.FinishDistribution()}>You don't have any ships. Click this button!</button>
+            {myTurn && <div className="board-finish-planning">
+                <button onClick={() => moves.FixGameMove()}>If game seems broken, click me!</button>
             </div>}
         </Fragment>
     )
@@ -131,6 +131,9 @@ function ChaosBoard({ctx, G, moves, myTurn, playerID, scale, offset}) {
                 {myShipBoards}
                 {otherShipBoards}
             </div>
+            {myTurn && !placingShip && <div className="board-finish-planning">
+                <button onClick={() => moves.FixGameMove()}>If game seems broken, click me!</button>
+            </div>}
             {myTurn && placingShip && <ShipPreview ctx={ctx} G={G} rotation={rotation} setRotation={setRotation}/>}
         </Fragment>
     )

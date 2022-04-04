@@ -208,8 +208,8 @@ function PlanCard(G, ctx, shipID, cardID) {
     G.players[ctx.playOrderPos].cards.splice(cardIdx, 1);
 }
 
-function FinishDistribution(G, ctx) {
-    if (G.players[ctx.playOrderPos].ships.length > 0) {
+function FixGameMove(G, ctx) {
+    if (!AllShipsForPlayerFinished(G, ctx, ctx.playOrderPos) && !AllShipsForPlayerPlayed(G, ctx, ctx.playOrderPos)) {
         return INVALID_MOVE;
     }
 }
@@ -255,7 +255,9 @@ function RevivePlayer(G, ctx, playerIdx) {
     const locations = [{x: 0, y: 0}, ...GetNeighbors({x: 0, y: 0})];
     for (const location of locations) {
         if (G.players.flatMap(player => player.ships).filter(ship => ship.x === location.x && ship.y === location.y).length === 0) {
-            G.players[playerIdx].ships.push(CreateShip(G, playerIdx, location.x, location.y, 0));
+            let newShip = CreateShip(G, playerIdx, location.x, location.y, 0);
+            newShip.plannedCards.push()
+            G.players[playerIdx].ships.push(newShip);
             break;
         }
     }
@@ -490,7 +492,7 @@ export const EntropyRally = {
         },
         production: {
             onBegin: PerformProduction,
-            moves: {DistributeEnergy, FinishDistribution},
+            moves: {DistributeEnergy, FixGameMove},
             turn: {
                 order: ONCE_SP,
                 endIf: (G, ctx) => (G.players[ctx.playOrderPos].unspentEnergy === 0 || G.players[ctx.playOrderPos].ships.length === 0),
@@ -510,7 +512,7 @@ export const EntropyRally = {
                 MoveLasers(G, ctx);
                 ResetPlayedThisTurn(G, ctx);
             },
-            moves: {PlayCard, PlaceShip},
+            moves: {PlayCard, PlaceShip, FixGameMove},
             turn: {
                 order: SHIP_ACTIONS_SP,
                 endIf: AllShipsForPlayerPlayed,
